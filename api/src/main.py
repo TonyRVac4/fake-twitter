@@ -6,8 +6,9 @@ from fastapi import FastAPI
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from api.src.routers import users
-from api.src.routers import tweets, medias
+from src.routers import users
+from src.routers import tweets, medias
+
 
 app = FastAPI()
 
