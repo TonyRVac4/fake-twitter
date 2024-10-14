@@ -9,7 +9,7 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get("")
 async def posts_list():
     """
     Returns list of posts for user
@@ -48,7 +48,7 @@ async def posts_list():
             "result": True,
             "tweet": [
                 {
-                    "id": int,
+                    "id": 1,
                     "content": "string",
                     "attachments": [
                         "link_1",
@@ -69,11 +69,11 @@ async def posts_list():
         }
     return JSONResponse(
         content=jsonable_encoder(test_json),
-        status_code=status.HTTP_201_CREATED,
+        status_code=status.HTTP_200_OK,
     )
 
 
-@router.post("/")
+@router.post("")
 async def add_new_post():
     """
     Creates a new post.

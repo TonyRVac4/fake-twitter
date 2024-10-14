@@ -85,7 +85,7 @@ async def self_profile_info():
     }
     """
     test_json = {
-        "result": "true",
+        "result": True,
         "user": {
             "id": 1,
             "name": "str",

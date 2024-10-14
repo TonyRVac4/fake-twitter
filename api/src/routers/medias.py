@@ -9,7 +9,7 @@ router = APIRouter(
 )
 
 
-@router.post("/")
+@router.post("")
 async def upload_media_from_post():
     """
     Endpoint для загрузки файлов из твита. Загрузка происходит через
@@ -27,7 +27,7 @@ async def upload_media_from_post():
     """
     return JSONResponse(
         content=jsonable_encoder(
-            {"result": True, "media_id": int}
+            {"result": True, "media_id": 1}
         ),
         status_code=status.HTTP_201_CREATED,
     )
