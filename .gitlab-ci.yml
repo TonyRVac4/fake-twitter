@@ -12,11 +12,15 @@ before_script: pip install -r requirements.txt
 
 unittest:
   stage: unittests
+  tags:
+    - students
   script:
     - pytest api/tests
 
 wemake-python-styleguide:
   stage: linters
+  tags:
+    - students
   before_script: pip install wemake-python-styleguide
   script: flake8 --ignore=D100,D104,Q000,WPS226,WPS432,E402,S101 api
   # after_script: pip uninstall wemake-python-styleguide -y
@@ -26,6 +30,8 @@ wemake-python-styleguide:
 
 mypy:
   stage: linters
+  tags:
+    - students
   before_script: pip install mypy
   script:
     - mypy --check-untyped-defs api/
