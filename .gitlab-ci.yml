@@ -1,0 +1,39 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+image: python:3.12
+
+stages:
+  - unittests
+  - linters
+
+before_script:
+  - pip install -r api/requirements.txt
+  -  pip install wemake-python-styleguide mypy
+
+unittest:
+  stage: unittests
+  tags:
+    - students
+  script:
+    - pytest api/tests
+
+wemake-python-styleguide:
+  stage: linters
+  tags:
+    - students
+  script: flake8 --ignore=D100,D104,Q000,WPS226,WPS432,E402,S101 api
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
+    - when: never
+
+mypy:
+  stage: linters
+  tags:
+    - students
+  script:
+    - mypy --check-untyped-defs api/
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
+    - when: never
