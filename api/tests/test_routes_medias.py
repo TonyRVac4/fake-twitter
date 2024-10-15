@@ -7,7 +7,7 @@ async def test_media_upload(ac: AsyncClient):
     Parameters:
         ac: AsyncClient
     """
-    test_data = {}
+    test_data: dict = {}
 
     request = await ac.post("/api/medias", data=test_data)
 

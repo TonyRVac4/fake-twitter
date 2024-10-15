@@ -21,7 +21,7 @@ async def test_create_new_post(ac: AsyncClient):
     Parameters:
         ac: AsyncClient
     """
-    test_data = {}
+    test_data: dict = {}
 
     request = await ac.post(url, data=test_data)
 

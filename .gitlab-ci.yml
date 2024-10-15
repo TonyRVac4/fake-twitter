@@ -8,7 +8,9 @@ stages:
   - unittests
   - linters
 
-before_script: pip install -r api/requirements.txt
+before_script:
+  - pip install -r api/requirements.txt
+  -  pip install wemake-python-styleguide mypy
 
 unittest:
   stage: unittests
@@ -21,21 +23,17 @@ wemake-python-styleguide:
   stage: linters
   tags:
     - students
-  before_script: pip install wemake-python-styleguide
   script: flake8 --ignore=D100,D104,Q000,WPS226,WPS432,E402,S101 api
-  # after_script: pip uninstall wemake-python-styleguide -y
-  # rules:
-  #   - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
-  #   - when: never
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
+    - when: never
 
 mypy:
   stage: linters
   tags:
     - students
-  before_script: pip install mypy
   script:
     - mypy --check-untyped-defs api/
-  # after_script: pip uninstall mypy -y
-  # rules:
-  #   - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
-  #   - when: never
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
+    - when: never
