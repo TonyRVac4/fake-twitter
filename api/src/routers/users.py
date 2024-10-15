@@ -1,8 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from fastapi import status
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, status  # HTTPException
 from fastapi.encoders import jsonable_encoder
-
+from fastapi.responses import JSONResponse
 
 router = APIRouter(
     prefix="/api/users",
@@ -11,22 +9,20 @@ router = APIRouter(
 
 @router.post("/{user_id}/follow")
 async def follow_user(user_id: int):
-    """
-    Follows the user.
+    """Follow the user.
 
-    :HTTP-Params:
+    HTTP-Params:
         api-key: str
 
-    :param user_id: int
+    Parameters:
+        user_id: int
 
-    :return: JSON
-        {
-            "result": True
-        }
+    Returns:
+        JSONResponse: результат выполнения опереации.
     """
     return JSONResponse(
         content=jsonable_encoder(
-            {"result": True}
+            {"result": True},
         ),
         status_code=status.HTTP_201_CREATED,
     )
@@ -34,22 +30,20 @@ async def follow_user(user_id: int):
 
 @router.delete("/{user_id}/follow")
 async def unfollow_user(user_id: int):
-    """
-    Unfollows the user.
+    """Unfollow the user.
 
-    :HTTP-Params:
+    HTTP-Params:
         api-key: str
 
-    :param user_id: int
+    Parameters:
+        user_id: int
 
-    :return: JSON
-        {
-            "result": True
-        }
+    Returns:
+        JSONResponse: результат выполнения опереации.
     """
     return JSONResponse(
         content=jsonable_encoder(
-            {"result": True}
+            {"result": True},
         ),
         status_code=status.HTTP_202_ACCEPTED,
     )
@@ -57,32 +51,13 @@ async def unfollow_user(user_id: int):
 
 @router.get("/me")
 async def self_profile_info():
-    """
-    Return user's profile information.
+    """Return user's profile information.
 
-    :HTTP-Params:
+    HTTP-Params:
         api-key: str
 
-    :return: JSON
-    {
-        "result": "true",
-        "user": {
-            "id": int,
-            "name": str,
-            "followers": [
-                {
-                    "id": int,
-                    "name": str,
-                },
-            ],
-            "following": [
-                {
-                    "id": int,
-                    "name": str,
-                },
-            ]
-        }
-    }
+    Returns:
+        JSON: результат запроса и информацию о пользователе.
     """
     test_json = {
         "result": True,
@@ -100,8 +75,8 @@ async def self_profile_info():
                     "id": 1,
                     "name": "str",
                 },
-            ]
-        }
+            ],
+        },
     }
     return JSONResponse(
         content=jsonable_encoder(test_json),
@@ -111,34 +86,16 @@ async def self_profile_info():
 
 @router.get("/{user_id}")
 async def user_profile_info_by_id(user_id: int):
-    """
-    Return user's profile information.
+    """Return user's profile information.
 
-    :HTTP-Params:
+    HTTP-Params:
         api-key: str
 
-    :param user_id: int
+    Parameters:
+        user_id: int
 
-    :return: JSON
-    {
-        "result": true,
-        "user": {
-            "id": int,
-            "name": str,
-            "followers": [
-                {
-                    "id": int,
-                    "name": str,
-                },
-            ],
-            "following": [
-                {
-                    "id": int,
-                    "name": str,
-                },
-            ]
-        }
-    }
+    Returns:
+        JSONResponse: результат запроса и информацию о пользователе.
     """
     test_json = {
         "result": True,
@@ -156,8 +113,8 @@ async def user_profile_info_by_id(user_id: int):
                     "id": 1,
                     "name": "str",
                 },
-            ]
-        }
+            ],
+        },
     }
     return JSONResponse(
         content=jsonable_encoder(test_json),

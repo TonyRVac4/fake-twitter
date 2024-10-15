@@ -1,8 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from fastapi import status
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, status  # HTTPException
 from fastapi.encoders import jsonable_encoder
-
+from fastapi.responses import JSONResponse
 
 router = APIRouter(
     prefix="/api/tweets",
@@ -11,62 +9,37 @@ router = APIRouter(
 
 @router.get("")
 async def posts_list():
-    """
-    Returns list of posts for user
+    """Return list of posts for user.
 
-    :HTTP-Params:
+    HTTP-Params:
         api-key: str
 
-    :return: JSON
-        {
-            "result": true,
-            "tweet": [
-                {
-                    "id": int,
-                    "content": string,
-                    "attachments": [
-                        link_1, // relative?
-                        link_2,
-                        ...
-                    ],
-                    "author": {
-                        "id": int,
-                        "name": string
-                    },
-                    "likes": [
-                        {
-                            "user_id": int,
-                            "name": string,
-                        },
-                    ],
-                },
-                ...,
-            ]
-        }
+    Returns:
+        JSON: результат запроса и список словорей с постами.
     """
     test_json = {
-            "result": True,
-            "tweet": [
-                {
+        "result": True,
+        "tweet": [
+            {
+                "id": 1,
+                "content": "string",
+                "attachments": [
+                    "link_1",
+                    "link_2",
+                ],
+                "author": {
                     "id": 1,
-                    "content": "string",
-                    "attachments": [
-                        "link_1",
-                        "link_2",
-                    ],
-                    "author": {
-                        "id": 1,
-                        "name": "string"
-                    },
-                    "likes": [
-                        {
-                            "user_id": 1,
-                            "name": "string",
-                        },
-                    ],
+                    "name": "string",
                 },
-            ]
-        }
+                "likes": [
+                    {
+                        "user_id": 1,
+                        "name": "string",
+                    },
+                ],
+            },
+        ],
+    }
     return JSONResponse(
         content=jsonable_encoder(test_json),
         status_code=status.HTTP_200_OK,
@@ -75,27 +48,20 @@ async def posts_list():
 
 @router.post("")
 async def add_new_post():
-    """
-    Creates a new post.
+    """Create a new post.
 
-    :HTTP-Params:
+    HTTP-Params:
         api-key: str
 
-    :param: JSON
-        {
-            "tweet_data": str,
-            "tweet_media_ids": Array[int]  # optional
-        }
+    Parameter:
+        JSON: текст поста и опциональный список идентификаторов медиа файлов.
 
-    :return: JSON
-        {
-            "result": true,
-            "tweeet_id": int
-        }
+    Returns:
+        JSONResponse: результат создания поста и идентификатор поста.
     """
     return JSONResponse(
         content=jsonable_encoder(
-            {"result": True, "tweeet_id": 1}
+            {"result": True, "tweeet_id": 1},
         ),
         status_code=status.HTTP_201_CREATED,
     )
@@ -103,24 +69,22 @@ async def add_new_post():
 
 @router.delete("/{post_id}")
 async def delete_post(post_id: int):
-    """
-    Deletes the post.
+    """Delete the post.
 
-    :HTTP-Params:
+    HTTP-Params:
         api-key: str
 
-    :param post_id: int
+    Parameters:
+        post_id: int
 
-    :return: JSON
-        {
-            “result”: true
-        }
+    Returns:
+        JSONResponse: результат удаления поста
 
     Note: make sure users delete their own posts!
     """
     return JSONResponse(
         content=jsonable_encoder(
-            {"result": True}
+            {"result": True},
         ),
         status_code=status.HTTP_202_ACCEPTED,
     )
@@ -128,22 +92,20 @@ async def delete_post(post_id: int):
 
 @router.post("/{post_id}/likes")
 async def like_post(post_id: int):
-    """
-    Likes the post.
+    """Like the post.
 
-    :HTTP-Params:
+    HTTP-Params:
         api-key: str
 
-    :param post_id: int
+    Parameters:
+        post_id: int
 
-    :return: JSON
-        {
-            “result”: true
-        }
+    Returns:
+        JSONResponse: результат установления лайка.
     """
     return JSONResponse(
         content=jsonable_encoder(
-            {"result": True}
+            {"result": True},
         ),
         status_code=status.HTTP_201_CREATED,
     )
@@ -151,22 +113,20 @@ async def like_post(post_id: int):
 
 @router.delete("/{post_id}/likes")
 async def remove_like_from_the_post(post_id: int):
-    """
-    Unlikes the post.
+    """Unlike the post.
 
-    :HTTP-Params:
+    HTTP-Params:
         api-key: str
 
-    :param post_id: int
+    Parameters:
+        post_id: int
 
-    :return: JSON
-        {
-            “result”: true
-        }
+    Returns:
+        JSONResponse: результат удаления лайка.
     """
     return JSONResponse(
         content=jsonable_encoder(
-            {"result": True}
+            {"result": True},
         ),
         status_code=status.HTTP_201_CREATED,
     )

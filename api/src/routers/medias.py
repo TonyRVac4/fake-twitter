@@ -1,8 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from fastapi import status
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, status  # HTTPException
 from fastapi.encoders import jsonable_encoder
-
+from fastapi.responses import JSONResponse
 
 router = APIRouter(
     prefix="/api/medias",
@@ -11,23 +9,16 @@ router = APIRouter(
 
 @router.post("")
 async def upload_media_from_post():
-    """
-    Endpoint для загрузки файлов из твита. Загрузка происходит через
-    отправку формы:
+    """Endpoint для загрузки файлов из твита.
 
-    :HTTP-Params:
+    HTTP-Params:
         api-key: str
         form: file=”image.jpg”
 
-    :return: JSON
-        {
-            "result": true,
-            "media_id": int
-        }
+    Returns:
+        JSONResponse: результат загрузки файла и идентификатором медиа.
     """
     return JSONResponse(
-        content=jsonable_encoder(
-            {"result": True, "media_id": 1}
-        ),
+        content=jsonable_encoder({"result": True, "media_id": 1}),
         status_code=status.HTTP_201_CREATED,
     )

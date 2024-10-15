@@ -1,8 +1,12 @@
-import pytest
 from httpx import AsyncClient
 
 
 async def test_media_upload(ac: AsyncClient):
+    """Test /api/medias endpoint works.
+
+    Parameters:
+        ac: AsyncClient
+    """
     test_data = {}
 
     request = await ac.post("/api/medias", data=test_data)
