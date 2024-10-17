@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status  # HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from schemas import BaseResponseDataOut, TweetDataIn, TweetResponseWithId
 
 router = APIRouter(
     prefix="/api/tweets",
@@ -46,15 +47,16 @@ async def posts_list():
     )
 
 
-@router.post("")
-async def add_new_post():
+@router.post("", response_model=TweetResponseWithId)
+async def add_new_post(new_tweet_data: TweetDataIn):
     """Create a new post.
 
     HTTP-Params:
         api-key: str
 
-    Parameter:
-        JSON: текст поста и опциональный список идентификаторов медиа файлов.
+    Parameters:
+        new_tweet_data: JSON текст поста и опциональный список
+                        идентификаторов медиа файлов.
 
     Returns:
         JSONResponse: результат создания поста и идентификатор поста.
@@ -67,7 +69,7 @@ async def add_new_post():
     )
 
 
-@router.delete("/{post_id}")
+@router.delete("/{post_id}", response_model=BaseResponseDataOut)
 async def delete_post(post_id: int):
     """Delete the post.
 
@@ -90,7 +92,7 @@ async def delete_post(post_id: int):
     )
 
 
-@router.post("/{post_id}/likes")
+@router.post("/{post_id}/likes", response_model=BaseResponseDataOut)
 async def like_post(post_id: int):
     """Like the post.
 
@@ -111,7 +113,7 @@ async def like_post(post_id: int):
     )
 
 
-@router.delete("/{post_id}/likes")
+@router.delete("/{post_id}/likes", response_model=BaseResponseDataOut)
 async def remove_like_from_the_post(post_id: int):
     """Unlike the post.
 

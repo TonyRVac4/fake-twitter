@@ -1,13 +1,14 @@
 from fastapi import APIRouter, status  # HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from schemas import BaseResponseDataOut, UserProfileDataOut
 
 router = APIRouter(
     prefix="/api/users",
 )
 
 
-@router.post("/{user_id}/follow")
+@router.post("/{user_id}/follow", response_model=BaseResponseDataOut)
 async def follow_user(user_id: int):
     """Follow the user.
 
@@ -28,7 +29,7 @@ async def follow_user(user_id: int):
     )
 
 
-@router.delete("/{user_id}/follow")
+@router.delete("/{user_id}/follow", response_model=BaseResponseDataOut)
 async def unfollow_user(user_id: int):
     """Unfollow the user.
 
@@ -49,7 +50,7 @@ async def unfollow_user(user_id: int):
     )
 
 
-@router.get("/me")
+@router.get("/me", response_model=UserProfileDataOut)
 async def self_profile_info():
     """Return user's profile information.
 
@@ -84,7 +85,7 @@ async def self_profile_info():
     )
 
 
-@router.get("/{user_id}")
+@router.get("/{user_id}", response_model=UserProfileDataOut)
 async def user_profile_info_by_id(user_id: int):
     """Return user's profile information.
 
