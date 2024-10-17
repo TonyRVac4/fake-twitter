@@ -16,6 +16,8 @@ async def ac() -> AsyncGenerator[AsyncClient, None]:
         AsyncClient
     """
     async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test", timeout=2,
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        timeout=2,
     ) as async_client:
         yield async_client

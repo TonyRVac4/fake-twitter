@@ -21,10 +21,9 @@ async def test_create_new_post(ac: AsyncClient):
     Parameters:
         ac: AsyncClient
     """
-    test_data: dict = {}
+    test_data: dict = {"tweet_data": "string", "tweet_media_ids": [0, 1, 54]}
 
-    request = await ac.post(url, data=test_data)
-
+    request = await ac.post(url, json=test_data)
     assert request.status_code == 201
     assert request.json().get("result") is True
 
