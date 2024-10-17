@@ -21,5 +21,5 @@ app.include_router(tweets.router)
 app.include_router(users.router)
 app.include_router(medias.router)
 
-if __name__ == '__main__':
-    uvicorn.run('main:app', port=5000, host='127.0.0.1')
+if __name__ == "__main__":
+    uvicorn.run("main:app", port=5000, host="127.0.0.1")
