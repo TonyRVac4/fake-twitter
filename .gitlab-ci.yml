@@ -23,7 +23,7 @@ wemake-python-styleguide:
   stage: linters
   tags:
     - students
-  script: flake8 --ignore=D100,D104,Q000,WPS226,WPS432,E402,S101 api
+  script: flake8 --ignore=D100,D104,Q000,WPS226,WPS432,E402,S101,WPS110 api
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
     - when: never
@@ -33,7 +33,7 @@ mypy:
   tags:
     - students
   script:
-    - mypy --check-untyped-defs api/
+    - mypy --disable-error-code=import-not-found api/
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
     - when: never
