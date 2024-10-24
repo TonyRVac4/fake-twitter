@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.pool import NullPool
 
 from src.main import app
-from src.config import abs_path_to_test_db, DATABASE_URL_TEST, base_metadata
-from src.db_config import get_async_session
+from src.config import abs_path_to_test_db, DATABASE_URL_TEST
+from src.db_config import get_async_session, base_metadata
 
 client = TestClient(app)
 
