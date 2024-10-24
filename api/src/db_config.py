@@ -1,7 +1,7 @@
 from typing import AsyncGenerator, Annotated
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.orm import declarative_base, mapped_column
+from sqlalchemy.orm import declarative_base, mapped_column, Mapped
 from sqlalchemy import NullPool, MetaData
 
 from config import DATABASE_URL
@@ -11,7 +11,6 @@ async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 base_metadata = MetaData()
 BaseModel = declarative_base()
-intpk = Annotated[int, mapped_column(primary_key=True, nullable=False)]
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
