@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.pool import NullPool
 
 from src.main import app
-from src.config import abs_path_to_test_db, DATABASE_URL_TEST
-from src.db_config import get_async_session, base_metadata
+from src.config import DATABASE_URL as DATABASE_URL_TEST  # configure test db
+from src.database_models.db_config import get_async_session, base_metadata
 
 client = TestClient(app)
 
@@ -39,8 +39,8 @@ async def set_up_db() -> None:
         yield
         await conn.run_sync(base_metadata.drop_all)
 
-    if os.path.exists(abs_path_to_test_db):
-        os.remove(abs_path_to_test_db)
+    # if os.path.exists(abs_path_to_test_db):
+    #     os.remove(abs_path_to_test_db)
 
 
 @pytest.fixture(scope="session")
