@@ -1,12 +1,11 @@
-from typing import List, Optional, Dict
+from typing import List
 from datetime import datetime, timedelta
 
-from sqlalchemy import select, delete, ForeignKey, UniqueConstraint
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.types import VARCHAR, TIMESTAMP
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from db_config import BaseModel, base_metadata
+from database_models.db_config import BaseModel, base_metadata
 
 
 class Users(BaseModel):
@@ -17,18 +16,19 @@ class Users(BaseModel):
     username: Mapped[str] = mapped_column(VARCHAR(15), unique=True, nullable=False,)
     email: Mapped[str] = mapped_column(VARCHAR(30), unique=True, nullable=False,)
 
-    tweets: Mapped[List["Tweets"]] = relationship(back_populates="user", uselist=True, lazy="joined")
+    tweets: Mapped[List["Tweets"]] = relationship(back_populates="user", uselist=True)
 
     followers: Mapped[List["Followers"]] = relationship(back_populates="user",
                                                         foreign_keys='Followers.user_id',
                                                         uselist=True,
-                                                        lazy="joined",
+
                                                         )
     following: Mapped[List["Followers"]] = relationship(back_populates="follower",
                                                         foreign_keys='Followers.follower_id',
                                                         uselist=True,
-                                                        lazy="joined",
+
                                                         )
+    likes: Mapped["Likes"] = relationship(back_populates="user")
 
 
 class Followers(BaseModel):
