@@ -1,10 +1,11 @@
-from fastapi import APIRouter, status, Depends  # HTTPException
+from fastapi import APIRouter, status, Depends, Request  # HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import JSONResponse
 from schemas import BaseResponseDataOut, TweetDataIn, TweetResponseWithId
 
 from database_models.methods.tweets import TweetsMethods
+from database_models.methods.users import CookiesMethods
 from database_models.db_config import get_async_session
 
 router = APIRouter(
@@ -13,24 +14,37 @@ router = APIRouter(
 
 
 @router.get("")
-async def posts_list(session: AsyncSession = Depends(get_async_session)):
+async def posts_list(request: Request, session: AsyncSession = Depends(get_async_session)):
     """Return list of posts for user.
 
     HTTP-Params:
         api-key: str
 
     Parameters:
-        session: Async session
+        request: FastAPI Request object
+        session: dependency - Async session
 
     Returns:
         JSON: результат запроса и список словорей с постами.
     """
-    result = await TweetsMethods.get_all(session, 1)
-    if result["result"] is True:
+
+    check_api_key: dict = await CookiesMethods.get_user_id(request.headers.get("api-key"), session)
+    if check_api_key["result"] is False:
         return JSONResponse(
-            content=jsonable_encoder(result),
+            content=jsonable_encoder(check_api_key),
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    tweets_data: dict = await TweetsMethods.get_all(check_api_key["user_id"], session)
+    if tweets_data["result"] is True:
+        return JSONResponse(
+            content=jsonable_encoder(tweets_data),
             status_code=status.HTTP_200_OK,
         )
+    return JSONResponse(
+        content=jsonable_encoder(tweets_data),
+        status_code=status.HTTP_404_NOT_FOUND,
+    )
 
 
 @router.post("", response_model=TweetResponseWithId)
