@@ -1,13 +1,13 @@
-from typing import AsyncGenerator, Annotated
+from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.orm import declarative_base, mapped_column, Mapped
+from sqlalchemy.orm import declarative_base
 from sqlalchemy import NullPool, MetaData
 
 from config import DATABASE_URL
 
 engine = create_async_engine(DATABASE_URL, poolclass=NullPool)
-async_session = async_sessionmaker(engine, expire_on_commit=False)
+async_session = async_sessionmaker(engine, expire_on_commit=False, autoflush=True)
 
 base_metadata = MetaData()
 BaseModel = declarative_base()

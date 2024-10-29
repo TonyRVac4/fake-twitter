@@ -7,9 +7,9 @@ from alembic import context
 
 from config import DATABASE_URL # noqa
 
-from database_models.tweet_data_models import Tweets, Medias, Likes # noqa
-from database_models.users_models import Users, Followers, Cookies # noqa
-from db_config import BaseModel, base_metadata # noqa
+from database_models.tweets_orm_models import Tweets, Medias, Likes # noqa
+from database_models.users_orm_models import Users, Followers, Cookies # noqa
+from database_models.db_config import BaseModel, base_metadata # noqa
 
 
 config = context.config
