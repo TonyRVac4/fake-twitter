@@ -18,3 +18,9 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 
     async with async_session() as session:
         yield session
+
+
+class ResponseData:
+    def __init__(self, response: dict, status_code: int):
+        self.response = response
+        self.status_code = status_code
