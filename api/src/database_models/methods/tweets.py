@@ -2,7 +2,7 @@ from typing import List, Dict, Any
 
 from sqlalchemy import select, delete, update, and_
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from sqlalchemy.exc import IntegrityError
 from database_models.users_orm_models import Users, Followers, Cookies
 from database_models.tweets_orm_models import Tweets, Medias, Likes
 from database_models.db_config import BaseModel, base_metadata, engine, async_session, ResponseData
@@ -75,7 +75,46 @@ class TweetsMethods(Tweets):
                 result, code = {
                     "result": False,
                     "error_type": "DataNotFound",
-                    "error_message": "Tweet with id:{id} not found".format(id=tweet_id),
+                    "error_message": "Tweet doesn't exist.",
                 }, 404
 
+            return ResponseData(response=result, status_code=code)
+
+
+class LikesMethods(Likes):
+    @classmethod
+    async def add(cls, user_id: int, tweet_id: int, async_session: AsyncSession) -> ResponseData:
+        async with async_session as session:
+            try:
+                new_like = Likes(user_id=user_id, tweet_id=tweet_id)
+                session.add(new_like)
+                await session.commit()
+                result, code = {"result": True}, 201
+            except IntegrityError:
+                result, code = {
+                    "result": False,
+                    "error_type": "UniqueViolationError",
+                    "error_message": "Like already exists.",
+                }, 400
+
+            return ResponseData(response=result, status_code=code)
+
+    @classmethod
+    async def delete(cls, user_id: int, tweet_id: int, async_session: AsyncSession) -> ResponseData:
+        async with async_session as session:
+            check_like_exists_exp = select(Likes).where(and_(Likes.user_id == user_id, Likes.tweet_id == tweet_id))
+            check_request = await session.execute(check_like_exists_exp)
+            check_result = check_request.scalars().one_or_none()
+
+            if check_result:
+                expression = delete(Likes).where(and_(Likes.user_id == user_id, Likes.tweet_id == tweet_id))
+                await session.execute(expression)
+                await session.commit()
+                result, code = {"result": True}, 200
+            else:
+                result, code = {
+                    "result": False,
+                    "error_type": "DataNotFound",
+                    "error_message": "Like doesn't exist.",
+                }, 404
             return ResponseData(response=result, status_code=code)
