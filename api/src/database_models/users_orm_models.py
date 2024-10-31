@@ -16,7 +16,7 @@ class Users(BaseModel):
     username: Mapped[str] = mapped_column(VARCHAR(15), unique=True, nullable=False,)
     email: Mapped[str] = mapped_column(VARCHAR(30), unique=True, nullable=False,)
 
-    tweets: Mapped[List["Tweets"]] = relationship(back_populates="user", uselist=True)
+    tweets: Mapped[List["Tweets"]] = relationship(back_populates="user", uselist=True, lazy="selectin")
 
     followers: Mapped[List["Followers"]] = relationship(back_populates="user",
                                                         foreign_keys='Followers.user_id',
@@ -28,7 +28,8 @@ class Users(BaseModel):
                                                         uselist=True,
 
                                                         )
-    likes: Mapped["Likes"] = relationship(back_populates="user")
+
+    likes: Mapped[List["Likes"]] = relationship(back_populates="user", uselist=True)
 
 
 class Followers(BaseModel):
