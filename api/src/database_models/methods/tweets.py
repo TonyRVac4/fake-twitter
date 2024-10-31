@@ -1,7 +1,8 @@
-from typing import List, Dict, Any
+from typing import List
 
-from sqlalchemy import select, delete, update, and_
+from sqlalchemy import select, delete, and_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
 from database_models.users_orm_models import Users, Followers, Cookies
 from database_models.tweets_orm_models import Tweets, Medias, Likes
@@ -12,34 +13,39 @@ class TweetsMethods(Tweets):
     @classmethod
     async def get_all(cls, user_id: int, async_session: AsyncSession) -> ResponseData:
         async with async_session as session:
-            expression = select(Tweets).where(Tweets.user_id == user_id)
-            # изменить с твитов самого пользователя на ленту для него и переименовать сам метод
-            request = await session.execute(expression)
-            request_data: list = request.scalars().fetchall()
+            get_user_expr = select(Followers).where(Followers.follower_id == user_id).options(selectinload(Followers.user))
+            request = await session.execute(get_user_expr)
+            follows: list = request.scalars().fetchall()
 
-            if request_data:
+            if follows:
                 result: dict = {"result": True, "tweet": []}
                 code: int = 200
 
-                for res in request_data:
-                    author: dict = {"id": res.user.id, "name": res.user.username}
-                    attachments: List[str] = [media.data for media in res.medias]
-                    likes: List[dict] = [{"user_id": like.user_id, "name": like.user.username} for like in res.likes]
+                for follow in follows:
+                    author_info: dict = {"id": follow.user.id, "name": follow.user.username}
 
-                    result["tweet"].append(
-                        {
-                            "id": res.id,
-                            "content": res.data,
-                            "attachments": attachments,
-                            "author": author,
-                            "likes": likes
-                        }
-                    )
+                    for tweet in follow.user.tweets:
+                        tweet_data_expr = select(Tweets).where(Tweets.id == tweet.id)
+                        tweet_data_request = await session.execute(tweet_data_expr)
+                        tweet_data: list = tweet_data_request.scalars().one_or_none()
+
+                        attachments: List[str] = [media.data for media in tweet_data.medias]
+                        likes: List[dict] = [{"user_id": like.user_id, "name": like.user.username} for like in tweet_data.likes]
+
+                        result["tweet"].append(
+                            {
+                                "id": tweet.id,
+                                "content": tweet.data,
+                                "attachments": attachments,
+                                "author": author_info,
+                                "likes": likes
+                            }
+                        )
             else:
                 result, code = {
                     "result": False,
                     "error_type": "DataNotFound",
-                    "error_message": "User with id:{id} not found".format(id=user_id),
+                    "error_message": "The user is not followed to anyone",
                 }, 404
 
             return ResponseData(response=result, status_code=code)
