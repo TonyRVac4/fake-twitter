@@ -1,9 +1,55 @@
-from sqlalchemy import select, delete, and_, update
+from sqlalchemy import select, delete, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import selectinload
 from database_models.users_orm_models import Users, Followers, Cookies
 from database_models.db_config import ResponseData
+
+
+class UsersMethods(Users):
+    @classmethod
+    async def get_by_id(cls, user_id: int, async_session: AsyncSession) -> ResponseData:
+        async with async_session as session:
+            expression = select(Users).where(Users.id == user_id).options(
+                    selectinload(Users.followers).selectinload(Followers.follower),  # Загрузка follower в followers
+                    selectinload(Users.following).selectinload(Followers.user)       # Загрузка user в following
+                )
+            request = await session.execute(expression)
+            user_data = request.scalars().one_or_none()
+
+            if user_data:
+                followers: list = [
+                    {
+                        "id": follower.follower_id,
+                        "name": follower.follower.username,
+                    }
+                    for follower in user_data.followers
+                ]
+                following: list = [
+                    {
+                        "id": following.user_id,
+                        "name": following.user.username,
+                    }
+                    for following in user_data.following
+                ]
+
+                result, code = {
+                    "result": True,
+                    "user": {
+                        "id": user_data.id,
+                        "name": user_data.username,
+                        "followers": followers,
+                        "following": following,
+                    },
+                }, 200
+            else:
+                result, code = {
+                    "result": False,
+                    "error_type": "DataNotFound",
+                    "error_message": "User does not exist.",
+                }, 404
+        return ResponseData(response=result, status_code=code)
 
 
 class FollowersMethods(Followers):

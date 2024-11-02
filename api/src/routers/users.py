@@ -1,11 +1,11 @@
-from fastapi import APIRouter, status, Depends, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from schemas import BaseResponseDataOut, UserProfileDataOut
 from database_models.db_config import get_async_session, ResponseData
-from database_models.methods.users import FollowersMethods, CookiesMethods
+from database_models.methods.users import FollowersMethods, CookiesMethods, UsersMethods
 
 router = APIRouter(
     prefix="/api/users",
@@ -94,28 +94,20 @@ async def self_profile_info(request: Request, session: AsyncSession = Depends(ge
     Returns:
         JSON: результат запроса и информацию о пользователе.
     """
-    test_json = {
-        "result": True,
-        "user": {
-            "id": 1,
-            "name": "str",
-            "followers": [
-                {
-                    "id": 1,
-                    "name": "str",
-                },
-            ],
-            "following": [
-                {
-                    "id": 1,
-                    "name": "str",
-                },
-            ],
-        },
-    }
+    api_key: str = request.headers.get("api-key")
+    check_api_key: ResponseData = await CookiesMethods.get_user_id(api_key, session)
+    if not check_api_key.response["result"]:
+        return JSONResponse(
+            content=jsonable_encoder(check_api_key.response),
+            status_code=check_api_key.status_code,
+        )
+
+    result: ResponseData = await UsersMethods.get_by_id(
+        user_id=check_api_key.response["user_id"], async_session=session
+    )
     return JSONResponse(
-        content=jsonable_encoder(test_json),
-        status_code=status.HTTP_200_OK,
+        content=jsonable_encoder(result.response),
+        status_code=result.status_code,
     )
 
 
@@ -134,26 +126,19 @@ async def user_profile_info_by_id(user_id: int, request: Request, session: Async
     Returns:
         JSONResponse: результат запроса и информацию о пользователе.
     """
-    test_json = {
-        "result": True,
-        "user": {
-            "id": 1,
-            "name": "str",
-            "followers": [
-                {
-                    "id": 1,
-                    "name": "str",
-                },
-            ],
-            "following": [
-                {
-                    "id": 1,
-                    "name": "str",
-                },
-            ],
-        },
-    }
+    api_key: str = request.headers.get("api-key")
+    check_api_key: ResponseData = await CookiesMethods.get_user_id(api_key, session)
+    if not check_api_key.response["result"]:
+        return JSONResponse(
+            content=jsonable_encoder(check_api_key.response),
+            status_code=check_api_key.status_code,
+        )
+
+    result: ResponseData = await UsersMethods.get_by_id(
+        user_id=user_id,
+        async_session=session,
+    )
     return JSONResponse(
-        content=jsonable_encoder(test_json),
-        status_code=status.HTTP_200_OK,
+        content=jsonable_encoder(result.response),
+        status_code=result.status_code,
     )
