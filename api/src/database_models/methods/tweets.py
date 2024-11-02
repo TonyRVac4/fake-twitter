@@ -13,7 +13,9 @@ class TweetsMethods(Tweets):
     @classmethod
     async def get_all(cls, user_id: int, async_session: AsyncSession) -> ResponseData:
         async with async_session as session:
-            get_user_expr = select(Followers).where(Followers.follower_id == user_id).options(selectinload(Followers.user))
+            get_user_expr = select(Followers).where(Followers.follower_id == user_id).options(
+                selectinload(Followers.user).selectinload(Users.tweets).selectinload(Tweets.likes).selectinload(Likes.user)
+            )
             request = await session.execute(get_user_expr)
             follows: list = request.scalars().fetchall()
 
@@ -25,12 +27,8 @@ class TweetsMethods(Tweets):
                     author_info: dict = {"id": follow.user.id, "name": follow.user.username}
 
                     for tweet in follow.user.tweets:
-                        tweet_data_expr = select(Tweets).where(Tweets.id == tweet.id)
-                        tweet_data_request = await session.execute(tweet_data_expr)
-                        tweet_data: list = tweet_data_request.scalars().one_or_none()
-
-                        attachments: List[str] = [media.data for media in tweet_data.medias]
-                        likes: List[dict] = [{"user_id": like.user_id, "name": like.user.username} for like in tweet_data.likes]
+                        attachments: List[str] = [media.data for media in tweet.medias]
+                        likes: List[dict] = [{"user_id": like.user_id, "name": like.user.username} for like in tweet.likes]
 
                         result["tweet"].append(
                             {
