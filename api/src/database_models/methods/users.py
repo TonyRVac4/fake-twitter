@@ -1,9 +1,64 @@
-from sqlalchemy import select, delete, update
+from sqlalchemy import select, delete, and_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
-
+from sqlalchemy.exc import IntegrityError
 from database_models.users_orm_models import Users, Followers, Cookies
 from database_models.db_config import ResponseData
+
+
+class FollowersMethods(Followers):
+    @classmethod
+    async def add(cls, follower_id: int, following_id: int, async_session: AsyncSession) -> ResponseData:
+        if following_id == follower_id:
+            return ResponseData(
+                response={
+                    "result": False,
+                    "error_type": "ValueError",
+                    "error_message": "You can't follow yourself!",
+                }, status_code=400
+            )
+
+        try:
+            async with async_session as session:
+                new_follower = Followers(user_id=following_id, follower_id=follower_id)
+                session.add(new_follower)
+                await session.commit()
+                result, code = {"result": True}, 201
+        except IntegrityError:
+            result, code = {
+                "result": False,
+                "error_type": "UniqueViolationError",
+                "error_message": "Follow already exists.",
+            }, 400
+
+        return ResponseData(response=result, status_code=400)
+
+    @classmethod
+    async def delete(cls, follower_id: int, following_id: int, async_session: AsyncSession) -> ResponseData:
+        async with async_session as session:
+            check_follow_exists_exp = select(Followers).where(and_(
+                        Followers.user_id == following_id,
+                        Followers.follower_id == follower_id
+                    ))
+            check_request = await session.execute(check_follow_exists_exp)
+            check_result = check_request.scalars().one_or_none()
+
+            if check_result:
+                del_expr = delete(Followers).where(and_(
+                    Followers.user_id == following_id,
+                    Followers.follower_id == follower_id
+                ))
+                await session.execute(del_expr)
+                await session.commit()
+                result, code = {"result": True}, 200
+            else:
+                result, code = {
+                    "result": False,
+                    "error_type": "DataNotFound",
+                    "error_message": "Follow does not exist.",
+                }, 404
+
+        return ResponseData(response=result, status_code=code)
 
 
 class CookiesMethods(Cookies):
@@ -16,7 +71,7 @@ class CookiesMethods(Cookies):
             return ResponseData(info={"result": True}, status_code=201)
 
     @classmethod
-    async def get_user_id(cls, api_key: str, async_session) -> dict:
+    async def get_user_id(cls, api_key: str, async_session: AsyncSession) -> dict:
         async with async_session as session:
             expression = select(Cookies).where(Cookies.hash == func.crypt(api_key, Cookies.hash))
             request = await session.execute(expression)
