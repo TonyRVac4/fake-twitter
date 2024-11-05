@@ -1,12 +1,12 @@
-from fastapi import APIRouter, status, Depends, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import JSONResponse
-from schemas import BaseResponseDataOut, TweetDataIn, TweetResponseWithId
+from schemas import BaseResponseDataOut, TweetDataIn, TweetResponseWithId  # noqa
 
-from database_models.methods.tweets import TweetsMethods, LikesMethods
-from database_models.methods.users import CookiesMethods
-from database_models.db_config import get_async_session, ResponseData
+from database_models.methods.tweets import TweetsMethods, LikesMethods  # noqa
+from database_models.methods.users import CookiesMethods  # noqa
+from database_models.db_config import get_async_session, ResponseData  # noqa
 
 router = APIRouter(
     prefix="/api/tweets",
@@ -59,7 +59,7 @@ async def add_new_post(new_tweet_data: TweetDataIn, request: Request, session: A
         JSONResponse: результат создания поста и идентификатор поста.
 
     """
-    new_tweet: dict = new_tweet_data.dict()
+    new_tweet: dict = new_tweet_data.model_dump()
     api_key: str = request.headers.get("api-key")
     check_api_key: ResponseData = await CookiesMethods.get_user_id(api_key, session)
     if not check_api_key.response["result"]:
