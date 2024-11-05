@@ -1,8 +1,9 @@
 from sqlalchemy import select, delete, and_
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database_models.users_orm_models import Users, Followers, Cookies
 from database_models.db_config import ResponseData
 
@@ -114,7 +115,7 @@ class CookiesMethods(Cookies):
             new_key = Cookies(user_id=user_id, hash=func.crypt(api_key, func.gen_salt("md5")))
             session.add(new_key)
             await session.commit()
-            return ResponseData(info={"result": True}, status_code=201)
+            return ResponseData(response={"result": True}, status_code=201)
 
     @classmethod
     async def get_user_id(cls, api_key: str, async_session: AsyncSession) -> dict:
