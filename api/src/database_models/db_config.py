@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import NullPool, MetaData
 
-from config import DATABASE_URL
+from config import DATABASE_URL  # noqa
 
 engine = create_async_engine(DATABASE_URL, poolclass=NullPool)
 async_session = async_sessionmaker(engine, expire_on_commit=False, autoflush=True)

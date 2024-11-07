@@ -4,8 +4,8 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database_models.users_orm_models import Users, Followers, Cookies
-from database_models.db_config import ResponseData
+from database_models.users_orm_models import Users, Followers, Cookies  # noqa
+from database_models.db_config import ResponseData  # noqa
 
 
 class UsersMethods(Users):
@@ -78,7 +78,7 @@ class FollowersMethods(Followers):
                 "error_message": "Follow already exists.",
             }, 400
 
-        return ResponseData(response=result, status_code=400)
+        return ResponseData(response=result, status_code=code)
 
     @classmethod
     async def delete(cls, follower_id: int, following_id: int, async_session: AsyncSession) -> ResponseData:

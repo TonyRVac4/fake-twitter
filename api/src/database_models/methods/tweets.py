@@ -4,9 +4,10 @@ from sqlalchemy import select, delete, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
-from database_models.users_orm_models import Users, Followers, Cookies
-from database_models.tweets_orm_models import Tweets, Medias, Likes
-from database_models.db_config import BaseModel, base_metadata, engine, async_session, ResponseData
+
+from database_models.users_orm_models import Users, Followers, Cookies  # noqa
+from database_models.tweets_orm_models import Tweets, Medias, Likes  # noqa
+from database_models.db_config import BaseModel, base_metadata, engine, async_session, ResponseData  # noqa
 
 
 class TweetsMethods(Tweets):
@@ -19,10 +20,10 @@ class TweetsMethods(Tweets):
             request = await session.execute(get_user_expr)
             follows: list = request.scalars().fetchall()
 
-            if follows:
-                result: dict = {"result": True, "tweet": []}
-                code: int = 200
+            result: dict = {"result": True, "tweet": []}
+            code: int = 200
 
+            if follows:
                 for follow in follows:
                     author_info: dict = {"id": follow.user.id, "name": follow.user.username}
 
@@ -39,12 +40,6 @@ class TweetsMethods(Tweets):
                                 "likes": likes
                             }
                         )
-            else:
-                result, code = {
-                    "result": False,
-                    "error_type": "DataNotFound",
-                    "error_message": "The user is not followed to anyone",
-                }, 404
 
             return ResponseData(response=result, status_code=code)
 
@@ -65,7 +60,7 @@ class TweetsMethods(Tweets):
 
             if check_result:
                 if check_result.user_id == user_id:
-                    del_expr = delete(Tweets).where(and_(Tweets.id == tweet_id, user_id == user_id))
+                    del_expr = delete(Tweets).where(Tweets.id == tweet_id)
                     await session.execute(del_expr)
                     await session.commit()
                     result, code = {"result": True}, 200

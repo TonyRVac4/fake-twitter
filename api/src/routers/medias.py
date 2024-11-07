@@ -1,10 +1,10 @@
-from fastapi import APIRouter, status, Depends  # HTTPException
+from fastapi import APIRouter, status, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schemas import MediaUploadResponseDataWithId
-from database_models.db_config import get_async_session
+from schemas import MediaUploadResponseDataWithId  # noqa
+from database_models.db_config import get_async_session  # noqa
 
 router = APIRouter(
     prefix="/api/medias",
