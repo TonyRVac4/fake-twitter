@@ -71,13 +71,25 @@ class FollowersMethods(Followers):
                 session.add(new_follower)
                 await session.commit()
                 result, code = {"result": True}, 201
-        except IntegrityError:
-            result, code = {
-                "result": False,
-                "error_type": "UniqueViolationError",
-                "error_message": "Follow already exists.",
-            }, 400
-
+        except IntegrityError as exp:
+            if 'duplicate key value violates unique constraint' in str(exp):
+                result, code = {
+                    "result": False,
+                    "error_type": "UniqueViolationError",
+                    "error_message": "Follow already exists.",
+                }, 400
+            elif 'violates foreign key constraint' in str(exp):
+                result, code = {
+                    "result": False,
+                    "error_type": "DataNotFound",
+                    "error_message": "User does not exist.",
+                }, 404
+            else:
+                result, code = {
+                    "result": False,
+                    "error_type": "InternalServerError",
+                    "error_message": exp.orig,
+                }, 500
         return ResponseData(response=result, status_code=code)
 
     @classmethod
