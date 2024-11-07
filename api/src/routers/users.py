@@ -102,7 +102,7 @@ async def self_profile_info(request: Request, session: AsyncSession = Depends(ge
             status_code=check_api_key.status_code,
         )
 
-    result: ResponseData = await UsersMethods.get_by_id(
+    result: ResponseData = await UsersMethods.get_info_by_id(
         user_id=check_api_key.response["user_id"], async_session=session
     )
     return JSONResponse(
@@ -134,7 +134,7 @@ async def user_profile_info_by_id(user_id: int, request: Request, session: Async
             status_code=check_api_key.status_code,
         )
 
-    result: ResponseData = await UsersMethods.get_by_id(
+    result: ResponseData = await UsersMethods.get_info_by_id(
         user_id=user_id,
         async_session=session,
     )

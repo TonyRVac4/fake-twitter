@@ -35,7 +35,7 @@ async def posts_list(request: Request, session: AsyncSession = Depends(get_async
             status_code=check_api_key.status_code,
         )
 
-    tweets_data: ResponseData = await TweetsMethods.get_all(check_api_key.response["user_id"], session)
+    tweets_data: ResponseData = await TweetsMethods.get_posts_for_user(check_api_key.response["user_id"], session)
     return JSONResponse(
         content=jsonable_encoder(tweets_data.response),
         status_code=tweets_data.status_code,

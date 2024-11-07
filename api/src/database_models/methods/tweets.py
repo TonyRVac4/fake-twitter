@@ -12,7 +12,7 @@ from database_models.db_config import BaseModel, base_metadata, engine, async_se
 
 class TweetsMethods(Tweets):
     @classmethod
-    async def get_all(cls, user_id: int, async_session: AsyncSession) -> ResponseData:
+    async def get_posts_for_user(cls, user_id: int, async_session: AsyncSession) -> ResponseData:
         async with async_session as session:
             get_user_expr = select(Followers).where(Followers.follower_id == user_id).options(
                 selectinload(Followers.user).selectinload(Users.tweets).selectinload(Tweets.likes).selectinload(Likes.user)

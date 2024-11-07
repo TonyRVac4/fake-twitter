@@ -10,7 +10,7 @@ from database_models.db_config import ResponseData  # noqa
 
 class UsersMethods(Users):
     @classmethod
-    async def get_by_id(cls, user_id: int, async_session: AsyncSession) -> ResponseData:
+    async def get_info_by_id(cls, user_id: int, async_session: AsyncSession) -> ResponseData:
         async with async_session as session:
             expression = select(Users).where(Users.id == user_id).options(
                     selectinload(Users.followers).selectinload(Followers.follower),  # Загрузка follower в followers
