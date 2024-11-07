@@ -17,7 +17,7 @@ unittest:
   tags:
     - students
   script:
-    - pytest api/tests
+    - pytest api/tests -p no:warnings
 
 wemake-python-styleguide:
   stage: linters
