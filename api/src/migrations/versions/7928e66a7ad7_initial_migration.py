@@ -73,10 +73,12 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["tweet_id"],
             ["tweets.id"],
+            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
             ["user_id"],
             ["users.id"],
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("user_id", "tweet_id"),
         sa.UniqueConstraint("user_id", "tweet_id", name="unique_like"),
@@ -89,6 +91,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["tweet_id"],
             ["tweets.id"],
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id"),
     )

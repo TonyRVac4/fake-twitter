@@ -4,7 +4,7 @@ from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.types import VARCHAR
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
-from database_models.db_config import BaseModel, base_metadata
+from database_models.db_config import BaseModel, base_metadata  # noqa
 
 
 class Tweets(BaseModel):
@@ -17,7 +17,7 @@ class Tweets(BaseModel):
 
     medias: Mapped[List["Medias"]] = relationship(back_populates="tweet", uselist=True, lazy="selectin")
     user: Mapped["Users"] = relationship(back_populates="tweets", uselist=True, lazy="selectin")
-    likes: Mapped[List["Likes"]] = relationship(back_populates="tweet", uselist=True, lazy="selectin")
+    likes: Mapped[List["Likes"]] = relationship(back_populates="tweet", uselist=True, lazy="selectin", cascade="all, delete-orphan")
 
 
 class Medias(BaseModel):
@@ -25,7 +25,7 @@ class Medias(BaseModel):
     metadata = base_metadata
 
     id: Mapped[int] = mapped_column(primary_key=True, nullable=False, autoincrement=True)
-    tweet_id: Mapped[int] = mapped_column(ForeignKey("tweets.id",), nullable=False)
+    tweet_id: Mapped[int] = mapped_column(ForeignKey("tweets.id", ondelete="CASCADE",), nullable=False)
     data: Mapped[str] = mapped_column(nullable=False)  # непонятно как хранить медиа
 
     tweet: Mapped["Tweets"] = relationship(back_populates="medias")
@@ -35,8 +35,8 @@ class Likes(BaseModel):
     __tablename__ = "likes"
     metadata = base_metadata
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, primary_key=True)
-    tweet_id: Mapped[int] = mapped_column(ForeignKey("tweets.id"), nullable=False, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE",), nullable=False, primary_key=True)
+    tweet_id: Mapped[int] = mapped_column(ForeignKey("tweets.id", ondelete="CASCADE",), nullable=False, primary_key=True)
 
     user: Mapped["Users"] = relationship(back_populates="likes", lazy="selectin")
     tweet: Mapped["Tweets"] = relationship(back_populates="likes", lazy="selectin")

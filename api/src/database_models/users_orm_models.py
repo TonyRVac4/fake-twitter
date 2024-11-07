@@ -5,7 +5,7 @@ from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.types import VARCHAR, TIMESTAMP
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
-from database_models.db_config import BaseModel, base_metadata
+from database_models.db_config import BaseModel, base_metadata  # noqa
 
 
 class Users(BaseModel):
