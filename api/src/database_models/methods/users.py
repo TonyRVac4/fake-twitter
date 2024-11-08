@@ -124,10 +124,24 @@ class CookiesMethods(Cookies):
     @classmethod
     async def add(cls, user_id: int, api_key: str, async_session: AsyncSession) -> dict:
         async with async_session as session:
-            new_key = Cookies(user_id=user_id, hash=func.crypt(api_key, func.gen_salt("md5")))
-            session.add(new_key)
-            await session.commit()
-            return ResponseData(response={"result": True}, status_code=201)
+            check_expr = select(Cookies).where(and_(
+                Cookies.hash == func.crypt(api_key, Cookies.hash)),
+            )
+            request = await session.execute(check_expr)
+            result = request.scalars().one_or_none()
+
+            if result is None:
+                new_key = Cookies(user_id=user_id, hash=func.crypt(api_key, func.gen_salt("md5")))
+                session.add(new_key)
+                await session.commit()
+                result, code = {"result": True}, 201
+            else:
+                result, code = {
+                    "result": False,
+                    "error_type": "UniqueViolationError",
+                    "error_message": "Key already exists.",
+                }, 400
+            return ResponseData(response=result, status_code=code)
 
     @classmethod
     async def get_user_id(cls, api_key: str, async_session: AsyncSession) -> dict:
