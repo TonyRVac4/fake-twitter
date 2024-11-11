@@ -2,7 +2,6 @@ from sqlalchemy import and_, delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-
 from database_models.db_config import ResponseData  # noqa
 from database_models.tweets_orm_models import Likes, Medias, Tweets  # noqa
 from database_models.users_orm_models import Cookies, Followers, Users  # noqa

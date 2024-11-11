@@ -4,7 +4,6 @@ from typing import List
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import TIMESTAMP, VARCHAR
-
 from database_models.db_config import BaseModel, base_metadata  # noqa
 
 

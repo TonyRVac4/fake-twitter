@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from database_models.db_config import get_async_session  # noqa
 from schemas import MediaUploadResponseDataWithId  # noqa
 

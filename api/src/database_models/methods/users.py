@@ -3,7 +3,6 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import func
-
 from database_models.db_config import ResponseData  # noqa
 from database_models.users_orm_models import Cookies, Followers, Users  # noqa
 

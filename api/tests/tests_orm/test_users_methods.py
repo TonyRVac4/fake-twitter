@@ -1,8 +1,8 @@
-from sqlalchemy import select, and_, func
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.database_models.methods.users import UsersMethods, FollowersMethods, CookiesMethods  # noqa
-from database_models.users_orm_models import Users, Followers, Cookies # noqa
+from src.database_models.methods.users import CookiesMethods  # noqa
+from src.database_models.methods.users import FollowersMethods, UsersMethods # noqa
+from database_models.users_orm_models import Cookies, Followers, Users  # noqa
 
 
 async def test_get_user_info_by_id(async_session: AsyncSession):
@@ -20,7 +20,7 @@ async def test_get_user_info_by_id(async_session: AsyncSession):
     assert request.response.get("result") is True
 
 
-async def test_can_not_get_nonexistence_users_info_by_id(async_session: AsyncSession):
+async def test_cant_get_nonexistence_users_info_by_id(async_session: AsyncSession):
     """Test users method: can not return info about user who does not exist.
 
     Parameters:
@@ -47,8 +47,8 @@ async def test_follow_user(async_session: AsyncSession):
 
     check_expr = select(Followers).where(and_(
         Followers.user_id == following_id,
-        Followers.follower_id == follower_id)
-    )
+        Followers.follower_id == follower_id,
+    ))
 
     async with async_session as session:
         check_request_before = await session.execute(check_expr)
@@ -65,13 +65,14 @@ async def test_follow_user(async_session: AsyncSession):
 
         check_request_after = await session.execute(check_expr)
         check_result_after = check_request_after.scalars().one_or_none()
-        assert check_result_after is not None
         assert check_result_after.user_id == following_id
         assert check_result_after.follower_id == follower_id
 
 
-async def test_can_not_follow_yourself(async_session: AsyncSession):
-    """Test follows method: can not add follow to the table where user follows themselves.
+async def test_cant_follow_yourself(async_session: AsyncSession):
+    """Test follows method.
+
+    Can not add follow to the table where user follows themselves.
 
     Parameters:
         async_session: AsyncSession
@@ -87,7 +88,7 @@ async def test_can_not_follow_yourself(async_session: AsyncSession):
     assert request.response.get("error_type") == "ValueError"
 
 
-async def test_can_not_follow_already_followed_user(async_session: AsyncSession):
+async def test_cant_follow_already_followed_user(async_session: AsyncSession):
     """Test follows method: can not add follow to the table if it already exists.
 
     Parameters:
@@ -104,7 +105,7 @@ async def test_can_not_follow_already_followed_user(async_session: AsyncSession)
     assert request.response.get("error_type") == "UniqueViolationError"
 
 
-async def test_can_not_follow_nonexistence_user(async_session: AsyncSession):
+async def test_cant_follow_nonexistence_user(async_session: AsyncSession):
     """Test follows method: can not add follow to the table if the user does not exist.
 
     Parameters:
@@ -132,14 +133,12 @@ async def test_unfollow_user(async_session: AsyncSession):
 
     check_expr = select(Followers).where(and_(
         Followers.user_id == following_id,
-        Followers.follower_id == follower_id)
-    )
+        Followers.follower_id == follower_id,
+    ))
 
     async with async_session as session:
         check_request_before = await session.execute(check_expr)
         check_result_before = check_request_before.scalars().one_or_none()
-
-        assert check_result_before is not None
         assert check_result_before.user_id == following_id
         assert check_result_before.follower_id == follower_id
 
@@ -156,7 +155,7 @@ async def test_unfollow_user(async_session: AsyncSession):
         assert check_result_after is None
 
 
-async def test_can_not_unfollow_not_followed_user(async_session: AsyncSession):
+async def test_cant_unfollow_not_followed_user(async_session: AsyncSession):
     """Test follows method: can not delete follow from the table if it does not exist.
 
     Parameters:
@@ -181,7 +180,9 @@ async def test_add_new_api_key(async_session: AsyncSession):
     """
     key = "lk0zc7v6b5n4l1l2k1j0m9g8f7d6s5a0"
     user_id = 2
-    check_expr = select(Cookies).where(Cookies.hash == func.crypt(key, Cookies.hash))
+    check_expr = select(Cookies).where(
+        Cookies.hash == func.crypt(key, Cookies.hash),
+    )
 
     async with async_session as session:
         check_request_before = await session.execute(check_expr)
@@ -202,8 +203,10 @@ async def test_add_new_api_key(async_session: AsyncSession):
         assert check_result_after.user_id == user_id
 
 
-async def test_can_not_add_existing_api_key(async_session: AsyncSession):
-    """Test cookies method: can not add new encrypted api-key to the table if it already exists.
+async def test_cant_add_existing_api_key(async_session: AsyncSession):
+    """Test cookies method.
+
+    Can not add new encrypted api-key to the table if it already exists.
 
     Parameters:
         async_session: AsyncSession

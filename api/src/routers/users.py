@@ -2,10 +2,9 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from database_models.db_config import ResponseData, get_async_session  # noqa
-from database_models.methods.users import (CookiesMethods, FollowersMethods,  # noqa
-                                           UsersMethods)  # noqa
+from database_models.methods.users import UsersMethods  # noqa
+from database_models.methods.users import CookiesMethods, FollowersMethods # noqa
 from schemas import BaseResponseDataOut, UserProfileDataOut  # noqa
 
 router = APIRouter(
