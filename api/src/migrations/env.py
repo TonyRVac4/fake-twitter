@@ -1,16 +1,12 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
-from config import DATABASE_URL # noqa
-
-from database_models.tweets_orm_models import Tweets, Medias, Likes # noqa
-from database_models.users_orm_models import Users, Followers, Cookies # noqa
-from database_models.db_config import BaseModel, base_metadata # noqa
-
+from config import DATABASE_URL  # noqa
+from database_models.db_config import BaseModel, base_metadata  # noqa
+from database_models.tweets_orm_models import Likes, Medias, Tweets  # noqa
+from database_models.users_orm_models import Cookies, Followers, Users  # noqa
 
 config = context.config
 
@@ -20,7 +16,9 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 
-config.set_main_option("sqlalchemy.url", DATABASE_URL + "?async_fallback=True")
+config.set_main_option(
+    "sqlalchemy.url", "{url}?async_fallback=True".format(url=DATABASE_URL),
+)
 
 target_metadata = base_metadata
 
@@ -66,7 +64,7 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            compare_server_default=True
+            compare_server_default=True,
         )
 
         with context.begin_transaction():

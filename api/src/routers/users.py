@@ -3,9 +3,10 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from database_models.db_config import ResponseData, get_async_session  # noqa
+from database_models.methods.users import (CookiesMethods, FollowersMethods,  # noqa
+                                           UsersMethods)  # noqa
 from schemas import BaseResponseDataOut, UserProfileDataOut  # noqa
-from database_models.db_config import get_async_session, ResponseData  # noqa
-from database_models.methods.users import FollowersMethods, CookiesMethods, UsersMethods  # noqa
 
 router = APIRouter(
     prefix="/api/users",
@@ -13,7 +14,11 @@ router = APIRouter(
 
 
 @router.post("/{user_id}/follow", response_model=BaseResponseDataOut)
-async def follow_user(user_id: int, request: Request, session: AsyncSession = Depends(get_async_session)):
+async def follow_user(
+    user_id: int,
+    request: Request,
+    session: AsyncSession = Depends(get_async_session),
+):
     """Follow the user.
 
     HTTP-Params:
@@ -28,7 +33,9 @@ async def follow_user(user_id: int, request: Request, session: AsyncSession = De
         JSONResponse: результат выполнения опереации.
     """
     api_key: str = request.headers.get("api-key")
-    check_api_key: ResponseData = await CookiesMethods.get_user_id(api_key, session)
+    check_api_key: ResponseData = await CookiesMethods.get_user_id(
+        api_key, session,
+    )
     if not check_api_key.response["result"]:
         return JSONResponse(
             content=jsonable_encoder(check_api_key.response),
@@ -47,7 +54,11 @@ async def follow_user(user_id: int, request: Request, session: AsyncSession = De
 
 
 @router.delete("/{user_id}/follow", response_model=BaseResponseDataOut)
-async def unfollow_user(user_id: int, request: Request, session: AsyncSession = Depends(get_async_session)):
+async def unfollow_user(
+    user_id: int,
+    request: Request,
+    session: AsyncSession = Depends(get_async_session),
+):
     """Unfollow the user.
 
     HTTP-Params:
@@ -62,7 +73,9 @@ async def unfollow_user(user_id: int, request: Request, session: AsyncSession = 
         JSONResponse: результат выполнения опереации.
     """
     api_key: str = request.headers.get("api-key")
-    check_api_key: ResponseData = await CookiesMethods.get_user_id(api_key, session)
+    check_api_key: ResponseData = await CookiesMethods.get_user_id(
+        api_key, session,
+    )
     if not check_api_key.response["result"]:
         return JSONResponse(
             content=jsonable_encoder(check_api_key.response),
@@ -81,7 +94,10 @@ async def unfollow_user(user_id: int, request: Request, session: AsyncSession = 
 
 
 @router.get("/me", response_model=UserProfileDataOut)
-async def self_profile_info(request: Request, session: AsyncSession = Depends(get_async_session)):
+async def self_profile_info(
+    request: Request,
+    session: AsyncSession = Depends(get_async_session),
+):
     """Return user's profile information.
 
     HTTP-Params:
@@ -95,7 +111,9 @@ async def self_profile_info(request: Request, session: AsyncSession = Depends(ge
         JSON: результат запроса и информацию о пользователе.
     """
     api_key: str = request.headers.get("api-key")
-    check_api_key: ResponseData = await CookiesMethods.get_user_id(api_key, session)
+    check_api_key: ResponseData = await CookiesMethods.get_user_id(
+        api_key, session,
+    )
     if not check_api_key.response["result"]:
         return JSONResponse(
             content=jsonable_encoder(check_api_key.response),
@@ -103,7 +121,8 @@ async def self_profile_info(request: Request, session: AsyncSession = Depends(ge
         )
 
     result: ResponseData = await UsersMethods.get_info_by_id(
-        user_id=check_api_key.response["user_id"], async_session=session
+        user_id=check_api_key.response["user_id"],
+        async_session=session,
     )
     return JSONResponse(
         content=jsonable_encoder(result.response),
@@ -112,7 +131,11 @@ async def self_profile_info(request: Request, session: AsyncSession = Depends(ge
 
 
 @router.get("/{user_id}", response_model=UserProfileDataOut)
-async def user_profile_info_by_id(user_id: int, request: Request, session: AsyncSession = Depends(get_async_session)):
+async def user_profile_info_by_id(
+    user_id: int,
+    request: Request,
+    session: AsyncSession = Depends(get_async_session),
+):
     """Return user's profile information.
 
     HTTP-Params:
@@ -127,7 +150,9 @@ async def user_profile_info_by_id(user_id: int, request: Request, session: Async
         JSONResponse: результат запроса и информацию о пользователе.
     """
     api_key: str = request.headers.get("api-key")
-    check_api_key: ResponseData = await CookiesMethods.get_user_id(api_key, session)
+    check_api_key: ResponseData = await CookiesMethods.get_user_id(
+        api_key, session,
+    )
     if not check_api_key.response["result"]:
         return JSONResponse(
             content=jsonable_encoder(check_api_key.response),

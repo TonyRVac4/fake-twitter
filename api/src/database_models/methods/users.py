@@ -1,21 +1,42 @@
-from sqlalchemy import select, delete, and_
-from sqlalchemy.sql import func
-from sqlalchemy.orm import selectinload
+from sqlalchemy import and_, delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+from sqlalchemy.sql import func
 
-from database_models.users_orm_models import Users, Followers, Cookies  # noqa
 from database_models.db_config import ResponseData  # noqa
+from database_models.users_orm_models import Cookies, Followers, Users  # noqa
 
 
 class UsersMethods(Users):
+    """Docs."""
+
     @classmethod
-    async def get_info_by_id(cls, user_id: int, async_session: AsyncSession) -> ResponseData:
+    async def get_info_by_id(
+        cls, user_id: int, async_session: AsyncSession,
+    ) -> ResponseData:
+        """Docs.
+
+        Parameters:
+            user_id: int
+            async_session: AsyncSession
+
+        Returns:
+            ResponseData
+        """
         async with async_session as session:
-            expression = select(Users).where(Users.id == user_id).options(
-                    selectinload(Users.followers).selectinload(Followers.follower),  # Загрузка follower в followers
-                    selectinload(Users.following).selectinload(Followers.user)       # Загрузка user в following
+            expression = (
+                select(Users).
+                where(Users.id == user_id).
+                options(
+                    selectinload(Users.followers).selectinload(
+                        Followers.follower,
+                    ),  # Загрузка follower в followers
+                    selectinload(Users.following).selectinload(
+                        Followers.user,
+                    ),  # Загрузка user в following
                 )
+            )
             request = await session.execute(expression)
             user_data = request.scalars().one_or_none()
 
@@ -54,15 +75,30 @@ class UsersMethods(Users):
 
 
 class FollowersMethods(Followers):
+    """Docs."""
+
     @classmethod
-    async def add(cls, follower_id: int, following_id: int, async_session: AsyncSession) -> ResponseData:
+    async def add(
+        cls, follower_id: int, following_id: int, async_session: AsyncSession,
+    ) -> ResponseData:
+        """Docs.
+
+        Parameters:
+            follower_id: int
+            following_id: int
+            async_session: AsyncSession
+
+        Returns:
+            ResponseData
+        """
         if following_id == follower_id:
             return ResponseData(
                 response={
                     "result": False,
                     "error_type": "ValueError",
                     "error_message": "You can't follow yourself!",
-                }, status_code=400
+                },
+                status_code=400,
             )
 
         try:
@@ -72,13 +108,13 @@ class FollowersMethods(Followers):
                 await session.commit()
                 result, code = {"result": True}, 201
         except IntegrityError as exp:
-            if 'duplicate key value violates unique constraint' in str(exp):
+            if "duplicate key value violates unique constraint" in str(exp):
                 result, code = {
                     "result": False,
                     "error_type": "UniqueViolationError",
                     "error_message": "Follow already exists.",
                 }, 400
-            elif 'violates foreign key constraint' in str(exp):
+            elif "violates foreign key constraint" in str(exp):
                 result, code = {
                     "result": False,
                     "error_type": "DataNotFound",
@@ -93,20 +129,36 @@ class FollowersMethods(Followers):
         return ResponseData(response=result, status_code=code)
 
     @classmethod
-    async def delete(cls, follower_id: int, following_id: int, async_session: AsyncSession) -> ResponseData:
+    async def delete(
+        cls, follower_id: int, following_id: int, async_session: AsyncSession,
+    ) -> ResponseData:
+        """Docs.
+
+        Parameters:
+            follower_id: int
+            following_id: int
+            async_session: AsyncSession
+
+        Returns:
+            ResponseData
+        """
         async with async_session as session:
-            check_follow_exists_exp = select(Followers).where(and_(
-                        Followers.user_id == following_id,
-                        Followers.follower_id == follower_id
-                    ))
+            check_follow_exists_exp = select(Followers).where(
+                and_(
+                    Followers.user_id == following_id,
+                    Followers.follower_id == follower_id,
+                ),
+            )
             check_request = await session.execute(check_follow_exists_exp)
             check_result = check_request.scalars().one_or_none()
 
             if check_result:
-                del_expr = delete(Followers).where(and_(
-                    Followers.user_id == following_id,
-                    Followers.follower_id == follower_id
-                ))
+                del_expr = delete(Followers).where(
+                    and_(
+                        Followers.user_id == following_id,
+                        Followers.follower_id == follower_id,
+                    ),
+                )
                 await session.execute(del_expr)
                 await session.commit()
                 result, code = {"result": True}, 200
@@ -121,17 +173,31 @@ class FollowersMethods(Followers):
 
 
 class CookiesMethods(Cookies):
+    """Docs."""
+
     @classmethod
     async def add(cls, user_id: int, api_key: str, async_session: AsyncSession) -> dict:
+        """Docs.
+
+        Parameters:
+            user_id: int
+            api_key: int
+            async_session: AsyncSession
+
+        Returns:
+            ResponseData
+        """
         async with async_session as session:
-            check_expr = select(Cookies).where(and_(
-                Cookies.hash == func.crypt(api_key, Cookies.hash)),
+            check_expr = select(Cookies).where(
+                and_(Cookies.hash == func.crypt(api_key, Cookies.hash)),
             )
             request = await session.execute(check_expr)
             result = request.scalars().one_or_none()
 
             if result is None:
-                new_key = Cookies(user_id=user_id, hash=func.crypt(api_key, func.gen_salt("md5")))
+                new_key = Cookies(
+                    user_id=user_id, hash=func.crypt(api_key, func.gen_salt("md5")),
+                )
                 session.add(new_key)
                 await session.commit()
                 result, code = {"result": True}, 201
@@ -145,8 +211,19 @@ class CookiesMethods(Cookies):
 
     @classmethod
     async def get_user_id(cls, api_key: str, async_session: AsyncSession) -> dict:
+        """Docs.
+
+        Parameters:
+            api_key: int
+            async_session: AsyncSession
+
+        Returns:
+            ResponseData
+        """
         async with async_session as session:
-            expression = select(Cookies).where(Cookies.hash == func.crypt(api_key, Cookies.hash))
+            expression = select(Cookies).where(
+                Cookies.hash == func.crypt(api_key, Cookies.hash),
+            )
             request = await session.execute(expression)
 
             matched_key = request.scalars().one_or_none()
@@ -157,6 +234,6 @@ class CookiesMethods(Cookies):
                 result, code = {
                     "result": False,
                     "error_type": "DataNotFound",
-                    "error_message": "User with provided api-key not found"
+                    "error_message": "User with provided api-key not found",
                 }, 404
             return ResponseData(response=result, status_code=code)
