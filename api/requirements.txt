@@ -4,3 +4,9 @@ pydantic
 pytest
 pytest-asyncio
 httpx
+sqlalchemy[asyncio]
+greenlet
+asyncpg
+alembic
+black
+python-dotenv
