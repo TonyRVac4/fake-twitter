@@ -1,5 +1,8 @@
-from alembic import command
+import os
 from alembic.config import Config
+from alembic import command
+
+os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 
 def apply_head_migration() -> None:
