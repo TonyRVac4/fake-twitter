@@ -2,22 +2,26 @@ workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
 
-image: python:3.12
-
 stages:
-  - unittests
+  - build
+  - test
   - linters
 
-before_script:
-  - pip install -r api/requirements.txt
-  - pip install wemake-python-styleguide mypy
+build-job:
+  stage: build
+  tags:
+    - students
+  scrip:
+    - docker build -t my-backend-image api/
 
 unittest:
-  stage: unittests
+  stage: test
   tags:
     - students
   script:
-    - pytest api/tests -p no:warnings
+    - docker compose -f api/docker-compose-test.yaml up -d
+  after_script:
+    - docker compose -f api/docker-compose-test.yaml rm -sf
 
 wemake-python-styleguide:
   stage: linters

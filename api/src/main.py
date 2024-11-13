@@ -4,6 +4,7 @@ import uvicorn
 from fastapi import FastAPI, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+
 from routers import medias, tweets, users
 
 app = FastAPI()

@@ -1,10 +1,11 @@
 from typing import AsyncGenerator
 
-from config import DATABASE_URL  # noqa
 from sqlalchemy import MetaData, NullPool
 from sqlalchemy.ext.asyncio import create_async_engine  # noqa
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker  # noqa
 from sqlalchemy.orm import declarative_base  # noqa
+
+from config import DATABASE_URL  # noqa
 
 engine = create_async_engine(DATABASE_URL, poolclass=NullPool)
 async_session = async_sessionmaker(engine, expire_on_commit=False, autoflush=True)
