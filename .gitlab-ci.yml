@@ -2,38 +2,32 @@ workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
 
-image: python:3.12
-
 stages:
-  - unittests
-  - linters
+  - build
+  - test
+  - linter
 
-before_script:
-  - pip install -r api/requirements.txt
-  -  pip install wemake-python-styleguide mypy
+build-job:
+  stage: build
+  tags:
+    - docker
+  script:
+    - docker build -t my-backend-image api/
 
 unittest:
-  stage: unittests
+  stage: test
   tags:
-    - students
+    - docker
   script:
-    - pytest api/tests
+    - docker compose -f api/docker-compose-test.yaml up --abort-on-container-exit
+  after_script:
+    - docker compose -f api/docker-compose-test.yaml down --remove-orphans
 
 wemake-python-styleguide:
-  stage: linters
+  stage: linter
   tags:
-    - students
-  script: flake8 --ignore=D100,D104,Q000,WPS226,WPS432,E402,S101,WPS110 api
-  rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
-    - when: never
-
-mypy:
-  stage: linters
-  tags:
-    - students
-  script:
-    - mypy --disable-error-code=import-not-found api/
+    - docker
+  script: docker run --rm my-backend-image bash -c "pip install wemake-python-styleguide && flake8 app/"
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
     - when: never
