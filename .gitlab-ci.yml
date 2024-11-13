@@ -26,7 +26,7 @@ unittest:
 wemake-python-styleguide:
   stage: linter
   tags:
-    - students
+    - docker
   script: docker run --rm my-backend-image bash -c "pip install wemake-python-styleguide && flake8 app/"
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
