@@ -4,7 +4,9 @@ services:
     build:
       context: ./api
     container_name: my-backend-container
-    working_dir: /src
+    working_dir: /app/src
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://admin:admin@db:5432
     ports:
       - "80:80"
     command: "uvicorn main:app --host 0.0.0.0 --port 80"

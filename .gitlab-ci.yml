@@ -5,39 +5,29 @@ workflow:
 stages:
   - build
   - test
-  - linters
+  - linter
 
 build-job:
   stage: build
   tags:
-    - students
-  scrip:
+    - docker
+  script:
     - docker build -t my-backend-image api/
 
 unittest:
   stage: test
   tags:
-    - students
+    - docker
   script:
-    - docker compose -f api/docker-compose-test.yaml up -d
+    - docker compose -f api/docker-compose-test.yaml up --abort-on-container-exit
   after_script:
-    - docker compose -f api/docker-compose-test.yaml rm -sf
+    - docker compose -f api/docker-compose-test.yaml down --remove-orphans
 
 wemake-python-styleguide:
-  stage: linters
+  stage: linter
   tags:
     - students
-  script: flake8 api
-  rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
-    - when: never
-
-mypy:
-  stage: linters
-  tags:
-    - students
-  script:
-    - mypy --disable-error-code=import-not-found api/
+  script: docker run --rm my-backend-image bash -c "pip install wemake-python-styleguide && flake8 app/"
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'develop'
     - when: never

@@ -13,7 +13,7 @@ services:
     image: my-backend-image:latest
     build:
       context: .
-    command: pytest tests -s -v -p no:warnings
+    command: pytest app/tests -s -v -p no:warnings
     environment:
       - DATABASE_URL=postgresql+asyncpg://admin:admin@db:5432
     depends_on:

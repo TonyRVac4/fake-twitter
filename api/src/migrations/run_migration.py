@@ -1,6 +1,7 @@
 import os
-from alembic.config import Config
+
 from alembic import command
+from alembic.config import Config
 
 os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 

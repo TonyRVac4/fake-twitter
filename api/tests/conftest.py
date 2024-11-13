@@ -8,7 +8,6 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine  # noqa
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker  # noqa
 from sqlalchemy.pool import NullPool
-
 from src.config import DATABASE_URL
 from src.database_models.db_config import base_metadata, get_async_session
 from src.main import app
