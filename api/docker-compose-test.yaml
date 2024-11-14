@@ -15,7 +15,10 @@ services:
       context: .
     command: pytest app/tests -s -v -p no:warnings
     environment:
-      - DATABASE_URL=postgresql+asyncpg://admin:admin@db:5432
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_PASS=admin
+      - DB_USER_NAME=admin
     depends_on:
       - db
     networks:
