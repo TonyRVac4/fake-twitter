@@ -29,10 +29,11 @@ wemake-python-styleguide:
     - docker
   script: docker run --rm my-backend-image bash -c "pip install wemake-python-styleguide && flake8 app/"
 
-
 deploy-job:
   stage: deploy
   script: docker compose up -d
+  tags:
+    - docker
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'
     - when: never
