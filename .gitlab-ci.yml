@@ -4,8 +4,7 @@ workflow:
 
 stages:
   - build
-  - test
-  - linter
+  - testing
   - deploy
 
 build-job:
@@ -16,7 +15,7 @@ build-job:
     - docker build -t my-backend-image api/
 
 unittest:
-  stage: test
+  stage: testing
   tags:
     - docker
   script:
@@ -25,7 +24,7 @@ unittest:
     - docker compose -f api/docker-compose-test.yaml down --remove-orphans
 
 wemake-python-styleguide:
-  stage: linter
+  stage: testing
   tags:
     - docker
   script: docker run --rm my-backend-image bash -c "pip install wemake-python-styleguide && flake8 app/"
