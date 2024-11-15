@@ -1,0 +1,45 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+stages:
+  - build
+  - testing
+  - deploy
+
+build-job:
+  stage: build
+  tags:
+    - docker
+  script:
+    - docker build -t my-backend-image api/
+
+unittest:
+  stage: testing
+  tags:
+    - docker
+  script:
+    - docker compose -f api/docker-compose-test.yaml up --abort-on-container-exit
+  after_script:
+    - docker compose -f api/docker-compose-test.yaml down --remove-orphans
+
+wemake-python-styleguide:
+  stage: testing
+  tags:
+    - docker
+  script: docker run --rm my-backend-image bash -c "pip install wemake-python-styleguide && flake8 app/"
+
+deploy-job:
+  stage: deploy
+  tags:
+    - docker
+  before_script:
+    - echo 'DB_HOST='DB_HOST >> .env
+    - echo 'DB_PORT='DB_PORT >> .env
+    - echo 'DB_PASS='DB_PASS >> .env
+    - echo 'DB_USER_NAME='DB_USER_NAME >> .env
+    - echo 'DB_NAME='DB_NAME >> .env
+  script: docker compose up -d
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'
+    - when: never
