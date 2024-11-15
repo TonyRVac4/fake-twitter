@@ -31,9 +31,15 @@ wemake-python-styleguide:
 
 deploy-job:
   stage: deploy
-  script: docker compose up -d
   tags:
     - docker
+  before_script:
+    - echo 'DB_HOST='DB_HOST >> .env
+    - echo 'DB_PORT='DB_PORT >> .env
+    - echo 'DB_PASS='DB_PASS >> .env
+    - echo 'DB_USER_NAME='DB_USER_NAME >> .env
+    - echo 'DB_NAME='DB_NAME >> .env
+  script: docker compose up -d
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'
     - when: never
