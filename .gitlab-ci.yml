@@ -19,7 +19,7 @@ unittest:
   tags:
     - docker
   script:
-    - docker compose -f api/docker-compose-test.yaml up --abort-on-container-exit
+    - docker compose -f api/tests/docker-compose-test.yaml up --abort-on-container-exit
   after_script:
     - docker compose -f api/docker-compose-test.yaml down --remove-orphans
 

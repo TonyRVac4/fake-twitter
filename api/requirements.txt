@@ -11,4 +11,5 @@ alembic
 black
 python-multipart
 aiobotocore
+types-aiobotocore-s3
 certifi
