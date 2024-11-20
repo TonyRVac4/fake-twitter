@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, UploadFile, Form, Header
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from types_aiobotocore_s3 import Client
 from database_models.db_config import get_async_session  # noqa
 from utils.s3_config import get_async_s3_client # noqa
 from schemas import MediaUploadResponseDataWithId  # noqa
@@ -23,7 +24,7 @@ async def upload_media_from_post(
     file: UploadFile,
     api_key: Annotated[str, Header()],
     session: AsyncSession = Depends(get_async_session),
-    s3_client=Depends(get_async_s3_client),
+    s3_client: Client = Depends(get_async_s3_client),
 ):
     """Endpoint для загрузки файлов из твита.
 
