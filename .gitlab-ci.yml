@@ -18,10 +18,15 @@ unittest:
   stage: testing
   tags:
     - docker
+  before_script:
+    - echo 'S3_ACCESS_KEY='S3_ACCESS_KEY >> .env
+    - echo 'S3_SECRET_KEY='S3_SECRET_KEY >> .env
+    - echo 'S3_URL='S3_URL >> .env
+    - echo 'TEST_S3_BUCKET_NANE='S3_BUCKET_NANE >> .env
   script:
     - docker compose -f api/tests/docker-compose-test.yaml up --abort-on-container-exit
   after_script:
-    - docker compose -f api/docker-compose-test.yaml down --remove-orphans
+    - docker compose -f api/tests/docker-compose-test.yaml down --remove-orphans
 
 wemake-python-styleguide:
   stage: testing
