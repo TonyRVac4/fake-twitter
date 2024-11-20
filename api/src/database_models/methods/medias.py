@@ -7,6 +7,25 @@ from database_models.tweets_orm_models import Medias # noqa
 
 class MediasMethods(Medias):
     @classmethod
+    async def get_by_tweet_id(cls, tweet_id: int, async_session: AsyncSession) -> ResponseData:
+        try:
+            async with async_session as session:
+                expr = select(Medias.link).where(Medias.tweet_id == tweet_id)
+                request = await session.execute(expr)
+                data: list = request.scalars().fetchall()
+                if data:
+                    result, code = {"result": True, "links": data}, 200
+                else:
+                    result, code = {"result": False}, 404
+        except SQLAlchemyError as err:
+            result, code = {
+                "result": False,
+                "error_type": "SQLAlchemyError",
+                "error_message": str(err),
+            }, 500
+        return ResponseData(response=result, status_code=code)
+
+    @classmethod
     async def add(cls, tweet_id: int, link: str, async_session: AsyncSession) -> ResponseData:
         """Add tweet id and link to the medias table.
 
