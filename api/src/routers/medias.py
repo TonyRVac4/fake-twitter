@@ -10,6 +10,7 @@ from schemas import MediaUploadResponseDataWithId  # noqa
 
 from database_models.db_config import ResponseData, get_async_session  # noqa
 from database_models.methods.medias import MediasMethods  # noqa
+from database_models.methods.tweets import TweetsMethods  # noqa
 from database_models.methods.users import CookiesMethods, FollowersMethods # noqa
 from schemas import BaseResponseDataOut  # noqa
 
@@ -52,6 +53,15 @@ async def upload_media_from_post(
         return JSONResponse(
             content=jsonable_encoder(check_api_key.response),
             status_code=check_api_key.status_code,
+        )
+
+    check_tweet_exist: ResponseData = await TweetsMethods.get(
+        tweet_id=tweet_id, async_session=session,
+    )
+    if not check_tweet_exist.response["result"]:
+        return JSONResponse(
+            content=jsonable_encoder(check_tweet_exist.response),
+            status_code=check_tweet_exist.status_code,
         )
 
     media_upload_result: ResponseData = await s3_client.upload(

@@ -11,6 +11,41 @@ class TweetsMethods(Tweets):
     """Class with Orm methods for Tweets table."""
 
     @classmethod
+    async def get(
+            cls, tweet_id: int, async_session: AsyncSession,
+    ) -> ResponseData:
+        """Return tweet by id.
+
+        Parameters:
+            tweet_id: int
+            async_session: AsyncSession
+
+        Returns:
+            ResponseData
+        """
+        try:
+            async with async_session as session:
+                expr = select(Tweets).where(Tweets.id == tweet_id)
+                request = await session.execute(expr)
+                tweet = request.scalars().one_or_none()
+                if tweet:
+                    result, code = {"result": True, "tweet": tweet}, 200
+                else:
+                    result, code = {
+                        "result": False,
+                        "error_type": "DataNotFound",
+                        "error_message": "Tweet does not exist",
+                    }, 404
+        except SQLAlchemyError as err:
+            result, code = {
+                "result": False,
+                "error_type": "SQLAlchemyError",
+                "error_message": str(err),
+            }, 500
+
+        return ResponseData(response=result, status_code=code)
+
+    @classmethod
     async def get_posts_for_user(
         cls, user_id: int, async_session: AsyncSession,
     ) -> ResponseData:
@@ -68,7 +103,7 @@ class TweetsMethods(Tweets):
                 "error_message": str(err),
             }, 500
 
-        return ResponseData(response=result, status_code=200)
+        return ResponseData(response=result, status_code=code)
 
     @classmethod
     async def add(
