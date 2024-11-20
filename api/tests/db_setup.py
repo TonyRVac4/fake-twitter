@@ -32,12 +32,6 @@ async def setup_test_data(async_session: AsyncSession):
         session.add_all([follow1, follow2, tweet1, tweet2, tweet3])
         await session.commit()
 
-        media1 = Medias(tweet_id=tweet1.id, data="link1")
-        media2 = Medias(tweet_id=tweet2.id, data="link2")
-        media3 = Medias(tweet_id=tweet2.id, data="link3")
-        session.add_all([media1, media2, media3])
-        await session.commit()
-
         key1 = Cookies(
             user_id=user1.id,
             hash=func.crypt("1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p", func.gen_salt("md5")),
