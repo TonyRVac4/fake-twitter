@@ -32,6 +32,11 @@ async def setup_test_data(async_session: AsyncSession):
         session.add_all([follow1, follow2, tweet1, tweet2, tweet3])
         await session.commit()
 
+        image1 = Medias(tweet_id=tweet1.id, link="https://s3.timeweb.cloud/37634968-test-backet/cat1.jpg")
+        image2 = Medias(tweet_id=tweet2.id, link="https://s3.timeweb.cloud/37634968-test-backet/cat2.jpg")
+        session.add_all([image1, image2])
+        await session.commit()
+
         key1 = Cookies(
             user_id=user1.id,
             hash=func.crypt("1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p", func.gen_salt("md5")),
