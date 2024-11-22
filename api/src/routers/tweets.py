@@ -132,7 +132,10 @@ async def delete_post(
         async_session=session,
     )
     if del_from_db_res.response["result"] and get_tweet_media.response["links"]:
-        file_names: list = [S3utils.get_name_from_link(link) for link in get_tweet_media.response["links"]]
+        file_names: list = [
+            S3utils.get_name_from_link(link)
+            for link in get_tweet_media.response["links"]
+        ]
         await s3_client.delete_multiple(media_names=file_names)
     return JSONResponse(
         content=jsonable_encoder(del_from_db_res.response),

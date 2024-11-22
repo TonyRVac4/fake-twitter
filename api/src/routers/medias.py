@@ -1,18 +1,18 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, UploadFile, Form, Header
+
+from fastapi import APIRouter, Depends, Form, Header, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from types_aiobotocore_s3 import Client
 from database_models.db_config import get_async_session  # noqa
-from utils.s3_config import get_async_s3_client # noqa
-from schemas import MediaUploadResponseDataWithId  # noqa
-
-from database_models.db_config import ResponseData, get_async_session  # noqa
+from database_models.db_config import ResponseData  # noqa
 from database_models.methods.medias import MediasMethods  # noqa
 from database_models.methods.tweets import TweetsMethods  # noqa
-from database_models.methods.users import CookiesMethods, FollowersMethods # noqa
+from database_models.methods.users import CookiesMethods, FollowersMethods  # noqa
 from schemas import BaseResponseDataOut  # noqa
+from schemas import MediaUploadResponseDataWithId  # noqa
+from utils.s3_config import get_async_s3_client  # noqa
 
 router = APIRouter(
     prefix="/api/medias",
@@ -32,11 +32,11 @@ async def upload_media_from_post(
     HTTP-Params:
         api-key: str
         form-data:
-            file: binary
-            tweet_id: int
+        - file: binary
+        - tweet_id: int
 
     Parameters:
-        tweet_id: int
+        tweet_id: form-data (int)
         file: FastAPI.UploadFile
         api_key: str
         session: Async session
@@ -45,7 +45,6 @@ async def upload_media_from_post(
     Returns:
         JSONResponse: результат загрузки файла и идентификатором медиа.
     """
-
     check_api_key: ResponseData = await CookiesMethods.get_user_id(
         api_key, session,
     )

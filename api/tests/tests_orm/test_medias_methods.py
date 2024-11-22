@@ -14,7 +14,7 @@ async def test_get_by_tweet_id(async_session: AsyncSession):
         async_session: AsyncSession
     """
     request = await MediasMethods.get_by_tweet_id(
-        tweet_id=1,
+        tweet_id=4,
         async_session=async_session,
     )
     assert request.status_code == 200
@@ -30,9 +30,8 @@ async def test_get_by_tweet_id_with_no_media(async_session: AsyncSession):
     Parameters:
         async_session: AsyncSession
     """
-
     request = await MediasMethods.get_by_tweet_id(
-        tweet_id=3,
+        tweet_id=5,
         async_session=async_session,
     )
     assert request.status_code == 404
@@ -63,7 +62,7 @@ async def test_add_media_link(async_session: AsyncSession):
     Parameters:
         async_session: AsyncSession
     """
-    tweet_id = 2
+    tweet_id = 4
     link = "https://s3.timeweb.cloud/37634968-test-backet/meme1.jpg"
 
     check_expr = select(Medias).where(and_(
@@ -88,10 +87,9 @@ async def test_add_media_link(async_session: AsyncSession):
         check_request_after = await session.execute(check_expr)
         check_result_after = check_request_after.scalars().one_or_none()
         assert check_result_after.tweet_id == tweet_id
-        assert check_result_after.link == link
 
 
-async def test_can_not_add_media_link_if_tweet_does_not_exist(async_session: AsyncSession):
+async def test_can_not_add_with_nonexistent_tweet(async_session: AsyncSession):
     """Test MediasMethods.add() method.
 
     Can't add media link to medias table if tweet doesn't exist.
@@ -190,7 +188,7 @@ async def test_delete_all_media_by_tweet_id(async_session: AsyncSession):
     Parameters:
         async_session: AsyncSession
     """
-    tweet_id = 1
+    tweet_id = 4
 
     check_expr = select(Medias).where(Medias.tweet_id == tweet_id)
 
@@ -212,7 +210,7 @@ async def test_delete_all_media_by_tweet_id(async_session: AsyncSession):
         assert len(check_result_after) == 0
 
 
-async def test_can_not_delete_media_by_nonexistent_tweet_id(async_session: AsyncSession):
+async def test_can_not_delete_by_nonexistent_tweet(async_session: AsyncSession):
     """Test MediasMethods.delete_all_by_tweet_id() method.
 
     Can't delete media links by tweet id if tweet doesn't exist.

@@ -1,4 +1,5 @@
 import os
+
 from httpx import AsyncClient
 
 os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -28,7 +29,7 @@ async def test_upload_media_from_post(ac: AsyncClient):
     assert request.json().get("media_id") is not None
 
 
-async def test_can_not_upload_media_from_nonexistent_post(ac: AsyncClient):
+async def test_can_not_upload_from_nonexistent_post(ac: AsyncClient):
     """Test /api/medias can't add media from the post that doesn't exist.
 
     Parameters:

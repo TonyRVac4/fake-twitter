@@ -12,7 +12,7 @@ class TweetsMethods(Tweets):
 
     @classmethod
     async def get(
-            cls, tweet_id: int, async_session: AsyncSession,
+        cls, tweet_id: int, async_session: AsyncSession,
     ) -> ResponseData:
         """Return tweet by id.
 
@@ -73,7 +73,7 @@ class TweetsMethods(Tweets):
                 request = await session.execute(get_user_expr)
                 follows: list = request.scalars().fetchall()
 
-                result: dict = {"result": True, "tweet": []}
+                result, code = {"result": True, "tweet": []}, 200
 
                 if follows:
                     for follow in follows:
@@ -82,7 +82,9 @@ class TweetsMethods(Tweets):
                                 {
                                     "id": tweet.id,
                                     "content": tweet.data,
-                                    "attachments": [media.data for media in tweet.medias],
+                                    "attachments": [
+                                        media.data for media in tweet.medias
+                                    ],
                                     "author": {
                                         "id": follow.user.id,
                                         "name": follow.user.username,
@@ -164,7 +166,8 @@ class TweetsMethods(Tweets):
                         result, code = {
                             "result": False,
                             "error_type": "ActionForbidden",
-                            "error_message": "You can not delete other people's tweets!",
+                            "error_message":
+                                "You can not delete other people's tweets!",
                         }, 401
                 else:
                     result, code = {
@@ -202,8 +205,8 @@ class LikesMethods(Likes):
         try:
             async with async_session as session:
                 new_like = Likes(user_id=user_id, tweet_id=tweet_id)
-            session.add(new_like)
-            await session.commit()
+                session.add(new_like)
+                await session.commit()
             result, code = {"result": True}, 201
         except SQLAlchemyError as err:
             if "duplicate key value violates unique constraint" in str(err):

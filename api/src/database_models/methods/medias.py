@@ -1,13 +1,26 @@
 from sqlalchemy import delete, select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 from database_models.db_config import ResponseData  # noqa
-from database_models.tweets_orm_models import Medias # noqa
+from database_models.tweets_orm_models import Medias  # noqa
 
 
 class MediasMethods(Medias):
+    """Class with Orm methods for Medias table."""
+
     @classmethod
-    async def get_by_tweet_id(cls, tweet_id: int, async_session: AsyncSession) -> ResponseData:
+    async def get_by_tweet_id(
+        cls, tweet_id: int, async_session: AsyncSession,
+    ) -> ResponseData:
+        """Return links by tweet id.
+
+        Parameters:
+            tweet_id: int
+            async_session: AsyncSession
+
+        Returns:
+            ResponseData
+        """
         try:
             async with async_session as session:
                 expr = select(Medias.link).where(Medias.tweet_id == tweet_id)
@@ -26,7 +39,9 @@ class MediasMethods(Medias):
         return ResponseData(response=result, status_code=code)
 
     @classmethod
-    async def add(cls, tweet_id: int, link: str, async_session: AsyncSession) -> ResponseData:
+    async def add(
+        cls, tweet_id: int, link: str, async_session: AsyncSession,
+    ) -> ResponseData:
         """Add tweet id and link to the medias table.
 
         Parameters:
@@ -96,7 +111,9 @@ class MediasMethods(Medias):
         return ResponseData(response=result, status_code=code)
 
     @classmethod
-    async def delete_all_by_tweet_id(cls, tweet_id: int, async_session: AsyncSession) -> ResponseData:
+    async def delete_all_by_tweet_id(
+        cls, tweet_id: int, async_session: AsyncSession,
+    ) -> ResponseData:
         """Delete medias by tweet id.
 
         Parameters:
@@ -108,7 +125,9 @@ class MediasMethods(Medias):
         """
         try:
             async with async_session as session:
-                check_media_exists_exp = select(Medias).where(Medias.tweet_id == tweet_id)
+                check_media_exists_exp = select(Medias).where(
+                    Medias.tweet_id == tweet_id,
+                )
                 check_request = await session.execute(check_media_exists_exp)
                 check_result = check_request.scalars().fetchall()
 

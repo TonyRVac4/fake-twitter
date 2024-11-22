@@ -192,7 +192,7 @@ class CookiesMethods(Cookies):
 
     @classmethod
     async def add(
-            cls, user_id: int, api_key: str, async_session: AsyncSession
+        cls, user_id: int, api_key: str, async_session: AsyncSession,
     ) -> ResponseData:
         """Add api key to Cookies table.
 
@@ -236,7 +236,7 @@ class CookiesMethods(Cookies):
 
     @classmethod
     async def get_user_id(
-            cls, api_key: str, async_session: AsyncSession
+        cls, api_key: str, async_session: AsyncSession,
     ) -> ResponseData:
         """Return api key by user id from Cookies table.
 
