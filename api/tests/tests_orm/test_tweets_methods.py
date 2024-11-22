@@ -25,11 +25,11 @@ async def test_add_new_tweet(async_session: AsyncSession):
     Parameters:
         async_session: AsyncSession
     """
-    test_data = {"tweet_data": "test data 1"}
+    test_data = "test data 1"
 
     request = await TweetsMethods.add(
         user_id=1,
-        data=test_data,
+        text=test_data,
         async_session=async_session,
     )
     tweet_id = request.response.get("tweet_id")
@@ -44,7 +44,7 @@ async def test_add_new_tweet(async_session: AsyncSession):
 
     assert result is not None
     assert result.id == tweet_id
-    assert result.data == test_data["tweet_data"]
+    assert result.data == test_data
 
 
 async def test_delete_tweet(async_session: AsyncSession):

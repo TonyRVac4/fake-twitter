@@ -1,5 +1,5 @@
 from sqlalchemy import and_, delete, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from database_models.db_config import ResponseData  # noqa
@@ -8,13 +8,48 @@ from database_models.users_orm_models import Cookies, Followers, Users  # noqa
 
 
 class TweetsMethods(Tweets):
-    """Docs."""
+    """Class with Orm methods for Tweets table."""
+
+    @classmethod
+    async def get(
+        cls, tweet_id: int, async_session: AsyncSession,
+    ) -> ResponseData:
+        """Return tweet by id.
+
+        Parameters:
+            tweet_id: int
+            async_session: AsyncSession
+
+        Returns:
+            ResponseData
+        """
+        try:
+            async with async_session as session:
+                expr = select(Tweets).where(Tweets.id == tweet_id)
+                request = await session.execute(expr)
+                tweet = request.scalars().one_or_none()
+                if tweet:
+                    result, code = {"result": True, "tweet": tweet}, 200
+                else:
+                    result, code = {
+                        "result": False,
+                        "error_type": "DataNotFound",
+                        "error_message": "Tweet does not exist",
+                    }, 404
+        except SQLAlchemyError as err:
+            result, code = {
+                "result": False,
+                "error_type": "SQLAlchemyError",
+                "error_message": str(err),
+            }, 500
+
+        return ResponseData(response=result, status_code=code)
 
     @classmethod
     async def get_posts_for_user(
         cls, user_id: int, async_session: AsyncSession,
     ) -> ResponseData:
-        """Docs.
+        """Return posts from followed pages for user by id.
 
         Parameters:
             user_id: int
@@ -23,73 +58,89 @@ class TweetsMethods(Tweets):
         Returns:
             ResponseData
         """
-        async with async_session as session:
-            get_user_expr = (
-                select(Followers).
-                where(Followers.follower_id == user_id).
-                options(
-                    selectinload(Followers.user).
-                    selectinload(Users.tweets).
-                    selectinload(Tweets.likes).
-                    selectinload(Likes.user),
+        try:
+            async with async_session as session:
+                get_user_expr = (
+                    select(Followers).
+                    where(Followers.follower_id == user_id).
+                    options(
+                        selectinload(Followers.user).
+                        selectinload(Users.tweets).
+                        selectinload(Tweets.likes).
+                        selectinload(Likes.user),
+                    )
                 )
-            )
-            request = await session.execute(get_user_expr)
-            follows: list = request.scalars().fetchall()
+                request = await session.execute(get_user_expr)
+                follows: list = request.scalars().fetchall()
 
-            result: dict = {"result": True, "tweet": []}
+                result, code = {"result": True, "tweet": []}, 200
 
-            if follows:
-                for follow in follows:
-                    for tweet in follow.user.tweets:
-                        result["tweet"].append(
-                            {
-                                "id": tweet.id,
-                                "content": tweet.data,
-                                "attachments": [media.data for media in tweet.medias],
-                                "author": {
-                                    "id": follow.user.id,
-                                    "name": follow.user.username,
+                if follows:
+                    for follow in follows:
+                        for tweet in follow.user.tweets:
+                            result["tweet"].append(
+                                {
+                                    "id": tweet.id,
+                                    "content": tweet.data,
+                                    "attachments": [
+                                        media.data for media in tweet.medias
+                                    ],
+                                    "author": {
+                                        "id": follow.user.id,
+                                        "name": follow.user.username,
+                                    },
+                                    "likes": [
+                                        {
+                                            "user_id": like.user_id,
+                                            "name": like.user.username,
+                                        }
+                                        for like in tweet.likes
+                                    ],
                                 },
-                                "likes": [
-                                    {
-                                        "user_id": like.user_id,
-                                        "name": like.user.username,
-                                    }
-                                    for like in tweet.likes
-                                ],
-                            },
-                        )
+                            )
+        except SQLAlchemyError as err:
+            result, code = {
+                "result": False,
+                "error_type": "SQLAlchemyError",
+                "error_message": str(err),
+            }, 500
 
-            return ResponseData(response=result, status_code=200)
+        return ResponseData(response=result, status_code=code)
 
     @classmethod
     async def add(
-        cls, user_id: int, data: dict, async_session: AsyncSession,
+        cls, user_id: int, text: str, async_session: AsyncSession,
     ) -> ResponseData:
-        """Docs.
+        """Add tweet to tweets table.
 
         Parameters:
             user_id: int
-            data: dict
+            text: str
             async_session: AsyncSession
 
         Returns:
             ResponseData
         """
-        async with async_session as session:
-            new_tweet = Tweets(user_id=user_id, data=data["tweet_data"])
-            session.add(new_tweet)
-            await session.commit()
-            return ResponseData(
-                response={"result": True, "tweet_id": new_tweet.id}, status_code=201,
-            )
+        try:
+            async with async_session as session:
+                new_tweet = Tweets(user_id=user_id, data=text)
+                session.add(new_tweet)
+                await session.commit()
+                result, code = {"result": True, "tweet_id": new_tweet.id}, 201
+        except SQLAlchemyError as err:
+            result, code = {
+                "result": False,
+                "error_type": "SQLAlchemyError",
+                "error_message": str(err),
+            }, 500
+
+        return ResponseData(response=result, status_code=code)
 
     @classmethod
     async def delete(
         cls, user_id: int, tweet_id: int, async_session: AsyncSession,
     ) -> ResponseData:
-        """Docs.
+        """Delete tweet from tweets table.
 
         Parameters:
             user_id: int
@@ -99,41 +150,49 @@ class TweetsMethods(Tweets):
         Returns:
             ResponseData
         """
-        async with async_session as session:
-            check_tweet_exists_exp = select(Tweets).where(Tweets.id == tweet_id)
-            check_request = await session.execute(check_tweet_exists_exp)
-            check_result = check_request.scalars().one_or_none()
+        try:
+            async with async_session as session:
+                check_tweet_exists_exp = select(Tweets).where(Tweets.id == tweet_id)
+                check_request = await session.execute(check_tweet_exists_exp)
+                check_result = check_request.scalars().one_or_none()
 
-            if check_result:
-                if check_result.user_id == user_id:
-                    del_expr = delete(Tweets).where(Tweets.id == tweet_id)
-                    await session.execute(del_expr)
-                    await session.commit()
-                    result, code = {"result": True}, 200
+                if check_result:
+                    if check_result.user_id == user_id:
+                        del_expr = delete(Tweets).where(Tweets.id == tweet_id)
+                        await session.execute(del_expr)
+                        await session.commit()
+                        result, code = {"result": True}, 200
+                    else:
+                        result, code = {
+                            "result": False,
+                            "error_type": "ActionForbidden",
+                            "error_message":
+                                "You can not delete other people's tweets!",
+                        }, 401
                 else:
                     result, code = {
                         "result": False,
-                        "error_type": "ActionForbidden",
-                        "error_message": "You can not delete other people's tweets!",
-                    }, 401
-            else:
-                result, code = {
-                    "result": False,
-                    "error_type": "DataNotFound",
-                    "error_message": "Tweet doesn't exist.",
-                }, 404
+                        "error_type": "DataNotFound",
+                        "error_message": "Tweet doesn't exist.",
+                    }, 404
+        except SQLAlchemyError as err:
+            result, code = {
+                "result": False,
+                "error_type": "SQLAlchemyError",
+                "error_message": str(err),
+            }, 500
 
-            return ResponseData(response=result, status_code=code)
+        return ResponseData(response=result, status_code=code)
 
 
 class LikesMethods(Likes):
-    """Docs."""
+    """Class with Orm methods for Likes table."""
 
     @classmethod
     async def add(
         cls, user_id: int, tweet_id: int, async_session: AsyncSession,
     ) -> ResponseData:
-        """Docs.
+        """Add like to likes table.
 
         Parameters:
             user_id: int
@@ -143,26 +202,39 @@ class LikesMethods(Likes):
         Returns:
             ResponseData
         """
-        async with async_session as session:
-            try:
+        try:
+            async with async_session as session:
                 new_like = Likes(user_id=user_id, tweet_id=tweet_id)
                 session.add(new_like)
                 await session.commit()
-                result, code = {"result": True}, 201
-            except IntegrityError:
+            result, code = {"result": True}, 201
+        except SQLAlchemyError as err:
+            if "duplicate key value violates unique constraint" in str(err):
                 result, code = {
                     "result": False,
                     "error_type": "UniqueViolationError",
                     "error_message": "Like already exists.",
                 }, 400
+            elif "violates foreign key constraint" in str(err):
+                result, code = {
+                    "result": False,
+                    "error_type": "DataNotFound",
+                    "error_message": "User does not exist.",
+                }, 404
+            else:
+                result, code = {
+                    "result": False,
+                    "error_type": "InternalServerError",
+                    "error_message": str(err),
+                }, 500
 
-            return ResponseData(response=result, status_code=code)
+        return ResponseData(response=result, status_code=code)
 
     @classmethod
     async def delete(
         cls, user_id: int, tweet_id: int, async_session: AsyncSession,
     ) -> ResponseData:
-        """Docs.
+        """Delete like from likes table.
 
         Parameters:
             user_id: int
@@ -172,24 +244,31 @@ class LikesMethods(Likes):
         Returns:
             ResponseData
         """
-        async with async_session as session:
-            check_like_exists_exp = select(Likes).where(
-                and_(Likes.user_id == user_id, Likes.tweet_id == tweet_id),
-            )
-            check_request = await session.execute(check_like_exists_exp)
-            check_result = check_request.scalars().one_or_none()
-
-            if check_result:
-                expression = delete(Likes).where(
+        try:
+            async with async_session as session:
+                check_like_exists_exp = select(Likes).where(
                     and_(Likes.user_id == user_id, Likes.tweet_id == tweet_id),
                 )
-                await session.execute(expression)
-                await session.commit()
-                result, code = {"result": True}, 200
-            else:
-                result, code = {
-                    "result": False,
-                    "error_type": "DataNotFound",
-                    "error_message": "Like doesn't exist.",
-                }, 404
-            return ResponseData(response=result, status_code=code)
+                check_request = await session.execute(check_like_exists_exp)
+                check_result = check_request.scalars().one_or_none()
+
+                if check_result:
+                    expression = delete(Likes).where(
+                        and_(Likes.user_id == user_id, Likes.tweet_id == tweet_id),
+                    )
+                    await session.execute(expression)
+                    await session.commit()
+                    result, code = {"result": True}, 200
+                else:
+                    result, code = {
+                        "result": False,
+                        "error_type": "DataNotFound",
+                        "error_message": "Like doesn't exist.",
+                    }, 404
+        except SQLAlchemyError as err:
+            result, code = {
+                "result": False,
+                "error_type": "SQLAlchemyError",
+                "error_message": str(err),
+            }, 500
+        return ResponseData(response=result, status_code=code)

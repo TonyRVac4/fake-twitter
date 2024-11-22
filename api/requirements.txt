@@ -9,4 +9,7 @@ greenlet
 asyncpg
 alembic
 black
-python-dotenv
+python-multipart
+aiobotocore
+types-aiobotocore-s3
+certifi
