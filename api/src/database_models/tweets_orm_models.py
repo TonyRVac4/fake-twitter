@@ -64,7 +64,7 @@ class Medias(BaseModel):
         ),
         nullable=False,
     )
-    data: Mapped[str] = mapped_column(nullable=False)  # непонятно как хранить медиа
+    link: Mapped[str] = mapped_column(VARCHAR(150), nullable=False)
 
     tweet: Mapped["Tweets"] = relationship(back_populates="medias")
 

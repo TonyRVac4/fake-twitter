@@ -87,7 +87,7 @@ def upgrade() -> None:
         "medias",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("tweet_id", sa.Integer(), nullable=False),
-        sa.Column("data", sa.String(), nullable=False),
+        sa.Column("link", sa.VARCHAR(length=150), nullable=False),
         sa.ForeignKeyConstraint(
             ["tweet_id"],
             ["tweets.id"],
