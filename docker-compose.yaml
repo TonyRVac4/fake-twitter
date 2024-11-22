@@ -11,6 +11,10 @@ services:
       - DB_PASS=${DB_PASS}
       - DB_USER_NAME=${DB_USER_NAME}
       - DB_NAME=${DB_NAME}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_KEY=${S3_SECRET_KEY}
+      - S3_URL=${S3_URL}
+      - S3_BUCKET_NANE=${S3_BUCKET_NANE}
     ports:
       - "80:80"
     command: "uvicorn main:app --host 0.0.0.0 --port 80"
