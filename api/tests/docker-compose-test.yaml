@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=test_db
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+    ports:
+      - '5432:5432'
+    networks:
+      - app_network
+
+  tests:
+    image: my-backend-image:latest
+    build:
+      context: .
+    command: pytest app/tests -s -v -p no:warnings
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_PASS=admin
+      - DB_USER_NAME=admin
+      - DB_NAME=test_db
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_KEY=${S3_SECRET_KEY}
+      - S3_URL=${S3_URL}
+      - S3_BUCKET_NANE=${S3_BUCKET_NANE}
+    depends_on:
+      - db
+    networks:
+      - app_network
+
+networks:
+  app_network:
