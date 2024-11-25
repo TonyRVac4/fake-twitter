@@ -261,9 +261,9 @@ class CookiesMethods(Cookies):
                 else:
                     result, code = {
                         "result": False,
-                        "error_type": "DataNotFound",
+                        "error_type": "Unauthorized",
                         "error_message": "User with provided api-key not found",
-                    }, 404
+                    }, 401
         except SQLAlchemyError as err:
             result, code = {
                 "result": False,
