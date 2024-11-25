@@ -95,7 +95,7 @@ class MediasMethods(Medias):
                     del_expr = delete(Medias).where(Medias.id == media_id)
                     await session.execute(del_expr)
                     await session.commit()
-                    result, code = {"result": True}, 200
+                    result, code = {"result": True}, 204
                 else:
                     result, code = {
                         "result": False,
@@ -135,7 +135,7 @@ class MediasMethods(Medias):
                     del_expr = delete(Medias).where(Medias.tweet_id == tweet_id)
                     await session.execute(del_expr)
                     await session.commit()
-                    result, code = {"result": True}, 200
+                    result, code = {"result": True}, 204
                 else:
                     result, code = {
                         "result": False,

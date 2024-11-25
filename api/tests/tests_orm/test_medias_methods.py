@@ -146,7 +146,7 @@ async def test_delete_by_media_id(async_session: AsyncSession):
             media_id=media_id,
             async_session=async_session,
         )
-        assert request.status_code == 200
+        assert request.status_code == 204
         assert request.response.get("result") is True
 
         check_request_after = await session.execute(check_expr)
@@ -202,7 +202,7 @@ async def test_delete_all_media_by_tweet_id(async_session: AsyncSession):
             tweet_id=tweet_id,
             async_session=async_session,
         )
-        assert request.status_code == 200
+        assert request.status_code == 204
         assert request.response.get("result") is True
 
         check_request_after = await session.execute(check_expr)
