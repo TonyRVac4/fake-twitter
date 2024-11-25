@@ -161,7 +161,7 @@ class TweetsMethods(Tweets):
                         del_expr = delete(Tweets).where(Tweets.id == tweet_id)
                         await session.execute(del_expr)
                         await session.commit()
-                        result, code = {"result": True}, 200
+                        result, code = {"result": True}, 204
                     else:
                         result, code = {
                             "result": False,
@@ -258,7 +258,7 @@ class LikesMethods(Likes):
                     )
                     await session.execute(expression)
                     await session.commit()
-                    result, code = {"result": True}, 200
+                    result, code = {"result": True}, 204
                 else:
                     result, code = {
                         "result": False,

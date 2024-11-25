@@ -170,7 +170,7 @@ class FollowersMethods(Followers):
                     )
                     await session.execute(del_expr)
                     await session.commit()
-                    result, code = {"result": True}, 200
+                    result, code = {"result": True}, 204
                 else:
                     result, code = {
                         "result": False,
@@ -207,7 +207,7 @@ class CookiesMethods(Cookies):
         try:
             async with async_session as session:
                 check_expr = select(Cookies).where(
-                    and_(Cookies.hash == func.crypt(api_key, Cookies.hash)),
+                    Cookies.hash == func.crypt(api_key, Cookies.hash),
                 )
                 request = await session.execute(check_expr)
                 result = request.scalars().one_or_none()
