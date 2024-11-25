@@ -5,7 +5,9 @@ from database_models.tweets_orm_models import Likes, Medias, Tweets  # noqa
 
 
 async def test_get_posts_for_user(async_session: AsyncSession):
-    """Test tweets method: return list of posts for user by id.
+    """Test TweetsMethods.get_posts_for_user() method.
+
+    Return list of posts for user by id.
 
     Parameters:
         async_session: AsyncSession
@@ -20,7 +22,9 @@ async def test_get_posts_for_user(async_session: AsyncSession):
 
 
 async def test_add_new_tweet(async_session: AsyncSession):
-    """Test tweets method: add new tweet to the table.
+    """Test TweetsMethods.add() method.
+
+    Add new tweet to the table.
 
     Parameters:
         async_session: AsyncSession
@@ -48,7 +52,9 @@ async def test_add_new_tweet(async_session: AsyncSession):
 
 
 async def test_delete_tweet(async_session: AsyncSession):
-    """Test tweets method: delete tweet from the table.
+    """Test TweetsMethods.delete() method.
+
+     Delete tweet from the table.
 
     Parameters:
         async_session: AsyncSession
@@ -67,7 +73,7 @@ async def test_delete_tweet(async_session: AsyncSession):
             tweet_id=tweet_id,
             async_session=async_session,
         )
-        assert request.status_code == 200
+        assert request.status_code == 204
         assert request.response.get("result") is True
 
         check_request_after = await session.execute(check_expr)
@@ -76,7 +82,9 @@ async def test_delete_tweet(async_session: AsyncSession):
 
 
 async def test_can_not_delete_other_person_tweet(async_session: AsyncSession):
-    """Test tweets method: can not delete other person tweet from the table.
+    """Test TweetsMethods.delete() method.
+
+     Can not delete other person tweet from the table.
 
     Parameters:
         async_session: AsyncSession
@@ -93,7 +101,9 @@ async def test_can_not_delete_other_person_tweet(async_session: AsyncSession):
 
 
 async def test_can_not_delete_nonexistent_tweet(async_session: AsyncSession):
-    """Test tweets method: can not delete tweet from the table if it does not exist.
+    """Test TweetsMethods.delete() method.
+
+     Can not delete tweet from the table if it does not exist.
 
     Parameters:
         async_session: AsyncSession
@@ -110,7 +120,9 @@ async def test_can_not_delete_nonexistent_tweet(async_session: AsyncSession):
 
 
 async def test_add_new_like(async_session: AsyncSession):
-    """Test likes method: add like to the table.
+    """Test LikesMethods.add() method.
+
+    Add like to the table.
 
     Parameters:
         async_session: AsyncSession
@@ -141,7 +153,9 @@ async def test_add_new_like(async_session: AsyncSession):
 
 
 async def test_can_not_add_existent_like(async_session: AsyncSession):
-    """Test likes method: can not add like to the table if it already exists.
+    """Test LikesMethods.add() method.
+
+    Can not add like to the table if it already exists.
 
     Parameters:
         async_session: AsyncSession
@@ -169,7 +183,9 @@ async def test_can_not_add_existent_like(async_session: AsyncSession):
 
 
 async def test_delete_like(async_session: AsyncSession):
-    """Test likes method: delete like from the table.
+    """Test LikesMethods.delete() method.
+
+    Delete like from the table.
 
     Parameters:
         async_session: AsyncSession
@@ -191,7 +207,7 @@ async def test_delete_like(async_session: AsyncSession):
             tweet_id=tweet_id,
             async_session=async_session,
         )
-        assert request.status_code == 200
+        assert request.status_code == 204
         assert request.response.get("result") is True
 
         check_request_after = await session.execute(check_expr)
@@ -200,7 +216,9 @@ async def test_delete_like(async_session: AsyncSession):
 
 
 async def test_can_not_delete_nonexistent_like(async_session: AsyncSession):
-    """Test likes method: can not delete like from the table if it does not exist.
+    """Test LikesMethods.delete() method.
+
+    Can not delete like from the table if it does not exist.
 
     Parameters:
         async_session: AsyncSession

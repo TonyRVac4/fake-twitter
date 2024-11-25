@@ -1,12 +1,15 @@
 """Main file to run the FastAPI app."""
 
 import uvicorn
-from fastapi import FastAPI, status
+from fastapi import Depends, FastAPI, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from middleware import api_key_check_dependency
 from routers import medias, tweets, users
 
-app = FastAPI()
+app = FastAPI(
+    dependencies=[Depends(api_key_check_dependency)],
+)
 
 app.include_router(tweets.router)
 app.include_router(users.router)

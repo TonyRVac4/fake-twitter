@@ -6,7 +6,9 @@ from database_models.users_orm_models import Cookies, Followers, Users  # noqa
 
 
 async def test_get_user_info_by_id(async_session: AsyncSession):
-    """Test users method: return info about user by id.
+    """Test UsersMethods.get_info_by_id() method.
+
+    Return info about user by id.
 
     Parameters:
         async_session: AsyncSession
@@ -21,7 +23,9 @@ async def test_get_user_info_by_id(async_session: AsyncSession):
 
 
 async def test_cant_get_nonexistence_users_info_by_id(async_session: AsyncSession):
-    """Test users method: can not return info about user who does not exist.
+    """Test UsersMethods.get_info_by_id() method.
+
+    Can not return info about user who does not exist.
 
     Parameters:
         async_session: AsyncSession
@@ -37,7 +41,9 @@ async def test_cant_get_nonexistence_users_info_by_id(async_session: AsyncSessio
 
 
 async def test_follow_user(async_session: AsyncSession):
-    """Test follow method: add follow to the table.
+    """Test FollowersMethods.add() method.
+
+    Add follow to the table.
 
     Parameters:
         async_session: AsyncSession
@@ -70,7 +76,7 @@ async def test_follow_user(async_session: AsyncSession):
 
 
 async def test_cant_follow_yourself(async_session: AsyncSession):
-    """Test follows method.
+    """Test FollowersMethods.add() method.
 
     Can not add follow to the table where user follows themselves.
 
@@ -89,7 +95,9 @@ async def test_cant_follow_yourself(async_session: AsyncSession):
 
 
 async def test_cant_follow_already_followed_user(async_session: AsyncSession):
-    """Test follows method: can not add follow to the table if it already exists.
+    """Test FollowersMethods.add() method.
+
+    Can not add follow to the table if it already exists.
 
     Parameters:
         async_session: AsyncSession
@@ -106,7 +114,9 @@ async def test_cant_follow_already_followed_user(async_session: AsyncSession):
 
 
 async def test_cant_follow_nonexistence_user(async_session: AsyncSession):
-    """Test follows method: can not add follow to the table if the user does not exist.
+    """Test FollowersMethods.add() method.
+
+    Can not add follow to the table if the user does not exist.
 
     Parameters:
         async_session: AsyncSession
@@ -123,7 +133,9 @@ async def test_cant_follow_nonexistence_user(async_session: AsyncSession):
 
 
 async def test_unfollow_user(async_session: AsyncSession):
-    """Test follows method: delete follow from the table.
+    """Test FollowersMethods.delete() method.
+
+    Delete follow from the table.
 
     Parameters:
         async_session: AsyncSession
@@ -147,7 +159,7 @@ async def test_unfollow_user(async_session: AsyncSession):
             following_id=following_id,
             async_session=async_session,
         )
-        assert request.status_code == 200
+        assert request.status_code == 204
         assert request.response.get("result") is True
 
         check_request_after = await session.execute(check_expr)
@@ -156,7 +168,9 @@ async def test_unfollow_user(async_session: AsyncSession):
 
 
 async def test_cant_unfollow_not_followed_user(async_session: AsyncSession):
-    """Test follows method: can not delete follow from the table if it does not exist.
+    """Test FollowersMethods.delete() method.
+
+    Can not delete follow from the table if it does not exist.
 
     Parameters:
         async_session: AsyncSession
@@ -173,7 +187,9 @@ async def test_cant_unfollow_not_followed_user(async_session: AsyncSession):
 
 
 async def test_add_new_api_key(async_session: AsyncSession):
-    """Test cookies method: add new encrypted api-key to the table.
+    """Test CookiesMethods.add() method.
+
+    Add new encrypted api-key to the table.
 
     Parameters:
         async_session: AsyncSession
@@ -204,7 +220,7 @@ async def test_add_new_api_key(async_session: AsyncSession):
 
 
 async def test_cant_add_existing_api_key(async_session: AsyncSession):
-    """Test cookies method.
+    """Test CookiesMethods.add() method.
 
     Can not add new encrypted api-key to the table if it already exists.
 
