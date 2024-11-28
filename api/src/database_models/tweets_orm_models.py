@@ -14,6 +14,7 @@ class MediasTweets(BaseModel):
     tweet_id (int): tweet id (ForeignKey)
     media_id (int): id of the tweet media (ForeignKey)
     """
+
     __tablename__ = "medias_tweets"
     metadata = base_metadata
 
@@ -34,7 +35,9 @@ class MediasTweets(BaseModel):
         nullable=False,
     )
 
-    __table_args__ = (UniqueConstraint("tweet_id", "media_id", name="unique_media_tweet"),)
+    __table_args__ = (
+        UniqueConstraint("tweet_id", "media_id", name="unique_media_tweet"),
+    )
 
 
 class Tweets(BaseModel):

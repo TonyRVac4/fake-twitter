@@ -51,7 +51,6 @@ class TweetsMethods(Tweets):
         """Return posts from followed pages for user by id.
 
         Parameters:
-            user_id: int
             async_session: AsyncSession
 
         Returns:
@@ -70,9 +69,7 @@ class TweetsMethods(Tweets):
                             {
                                 "id": tweet.id,
                                 "content": tweet.data,
-                                "attachments": [
-                                   media.link for media in tweet.medias
-                                ],
+                                "attachments": [media.link for media in tweet.medias],
                                 "author": {
                                     "id": tweet.user.id,
                                     "name": tweet.user.username,

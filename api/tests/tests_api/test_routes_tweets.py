@@ -53,7 +53,7 @@ async def test_create_new_post(ac: AsyncClient):
     assert request.json().get("result") is True
 
 
-async def test_cant_create_new_post_with_nonexistent_medias(ac: AsyncClient):
+async def test_cant_create_post_with_nonexistent_medias(ac: AsyncClient):
     """Test POST /api/medias endpoint works.
 
     Parameters:

@@ -75,7 +75,6 @@ async def test_add_tweet_with_media(async_session: AsyncSession):
         check_tweet_request = await session.execute(check_tweet_expr)
         check_tweet_result = check_tweet_request.scalars().one_or_none()
 
-        assert check_tweet_result is not None
         assert check_tweet_result.id == tweet_id
         assert check_tweet_result.data == test_data["tweet_data"]
 
@@ -83,15 +82,15 @@ async def test_add_tweet_with_media(async_session: AsyncSession):
             and_(
                 MediasTweets.tweet_id == tweet_id,
                 MediasTweets.media_id == test_data["tweet_media_ids"][0],
-            )
+            ),
         )
         check_media_relation_request = await session.execute(check_media_relation_expr)
-        check_media_relation_result = check_media_relation_request.scalars().one_or_none()
+        check_relation_result = check_media_relation_request.scalars().one_or_none()
 
-        assert check_media_relation_result is not None
+        assert check_relation_result is not None
 
 
-async def test_can_not_add_tweet_with_nonexistent_medias(async_session: AsyncSession):
+async def test_cant_add_tweet_with_nonexistent_medias(async_session: AsyncSession):
     """Test TweetsMethods.add() method.
 
     Can't add tweet if medias doesn't exist.
@@ -99,7 +98,6 @@ async def test_can_not_add_tweet_with_nonexistent_medias(async_session: AsyncSes
     Parameters:
         async_session: AsyncSession
     """
-
     data = {"tweet_data": "Hello, world!", "tweet_media_ids": [7, 8]}
 
     request = await TweetsMethods.add(

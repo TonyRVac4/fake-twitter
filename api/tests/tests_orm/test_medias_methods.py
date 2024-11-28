@@ -62,7 +62,6 @@ async def test_add_media_link(async_session: AsyncSession):
     Parameters:
         async_session: AsyncSession
     """
-    tweet_id = 4
     link = "https://s3.timeweb.cloud/37634968-test-backet/meme1.jpg"
 
     async with async_session as session:
