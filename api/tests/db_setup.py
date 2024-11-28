@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
-from database_models.tweets_orm_models import Likes, Medias, Tweets  # noqa
+from database_models.tweets_orm_models import Likes, MediasTweets, Medias, Tweets # noqa
 from database_models.users_orm_models import Cookies, Followers, Users  # noqa
 
 
@@ -32,20 +32,31 @@ async def setup_test_data(async_session: AsyncSession):
         tweet3 = Tweets(user_id=user2.id, data="Cutie cats")
         tweet4 = Tweets(user_id=user3.id, data="Random data1")
         tweet5 = Tweets(user_id=user3.id, data="Random data2")
-        session.add_all(
-            [follow1, follow2, tweet1, tweet2, tweet3, tweet4, tweet5],
-        )
-        await session.commit()
 
         image1 = Medias(
-            tweet_id=tweet4.id,
             link="https://s3.timeweb.cloud/37634968-test-backet/cat1.jpg",
         )
         image2 = Medias(
-            tweet_id=tweet4.id,
             link="https://s3.timeweb.cloud/37634968-test-backet/cat2.jpg",
         )
-        session.add_all([image1, image2])
+        image3 = Medias(
+            link="https://s3.timeweb.cloud/37634968-test-backet/cat1.jpg",
+        )
+        image4 = Medias(
+            link="https://s3.timeweb.cloud/37634968-test-backet/cat2.jpg",
+        )
+        session.add_all(
+            [
+                follow1, follow2, tweet1, tweet2,
+                tweet3, tweet4, tweet5, image1,
+                image2, image3, image4,
+            ]
+        )
+        await session.commit()
+
+        relation1 = MediasTweets(tweet_id=tweet4.id, media_id=image1.id)
+        relation2 = MediasTweets(tweet_id=tweet4.id, media_id=image2.id)
+        session.add_all([relation1, relation2])
         await session.commit()
 
         key1 = Cookies(
