@@ -67,7 +67,7 @@ async def add_new_post(
 
     result: ResponseData = await TweetsMethods.add(
         user_id=user_id,
-        text=new_tweet["tweet_data"],
+        data=new_tweet,
         async_session=session,
     )
     return JSONResponse(

@@ -2,7 +2,7 @@ from sqlalchemy import and_, delete, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from database_models.db_config import ResponseData  # noqa
-from database_models.tweets_orm_models import Likes, Medias, Tweets  # noqa
+from database_models.tweets_orm_models import Likes, MediasTweets, Medias, Tweets  # noqa
 from database_models.users_orm_models import Cookies, Followers, Users  # noqa
 
 
@@ -71,7 +71,7 @@ class TweetsMethods(Tweets):
                                 "id": tweet.id,
                                 "content": tweet.data,
                                 "attachments": [
-                                    media.data for media in tweet.medias
+                                   media.link for media in tweet.medias
                                 ],
                                 "author": {
                                     "id": tweet.user.id,
@@ -97,13 +97,13 @@ class TweetsMethods(Tweets):
 
     @classmethod
     async def add(
-        cls, user_id: int, text: str, async_session: AsyncSession,
+        cls, user_id: int, data: dict, async_session: AsyncSession,
     ) -> ResponseData:
         """Add tweet to tweets table.
 
         Parameters:
             user_id: int
-            text: str
+            data: {"tweet_data": str, "tweet_media_ids": Array[int]}
             async_session: AsyncSession
 
         Returns:
@@ -111,16 +111,31 @@ class TweetsMethods(Tweets):
         """
         try:
             async with async_session as session:
-                new_tweet = Tweets(user_id=user_id, data=text)
+                new_tweet = Tweets(user_id=user_id, data=data["tweet_data"])
                 session.add(new_tweet)
+                await session.flush()
+
+                if data["tweet_media_ids"]:
+                    for m_id in data["tweet_media_ids"]:
+                        new_relation = MediasTweets(
+                            tweet_id=new_tweet.id, media_id=m_id,
+                        )
+                        session.add(new_relation)
                 await session.commit()
                 result, code = {"result": True, "tweet_id": new_tweet.id}, 201
         except SQLAlchemyError as err:
-            result, code = {
-                "result": False,
-                "error_type": "SQLAlchemyError",
-                "error_message": str(err),
-            }, 500
+            if "violates foreign key constraint" in str(err):
+                result, code = {
+                    "result": False,
+                    "error_type": "DataNotFound",
+                    "error_message": "Media does not exist.",
+                }, 404
+            else:
+                result, code = {
+                    "result": False,
+                    "error_type": "SQLAlchemyError",
+                    "error_message": str(err),
+                }, 500
 
         return ResponseData(response=result, status_code=code)
 

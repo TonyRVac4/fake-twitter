@@ -6,6 +6,37 @@ from sqlalchemy.types import VARCHAR
 from database_models.db_config import BaseModel, base_metadata  # noqa
 
 
+class MediasTweets(BaseModel):
+    """Sqlalchemy association table class.
+
+    __tablename__: medias_tweets
+
+    tweet_id (int): tweet id (ForeignKey)
+    media_id (int): id of the tweet media (ForeignKey)
+    """
+    __tablename__ = "medias_tweets"
+    metadata = base_metadata
+
+    tweet_id: Mapped[int] = mapped_column(
+        ForeignKey(
+            "tweets.id",
+            ondelete="CASCADE",
+        ),
+        primary_key=True,
+        nullable=False,
+    )
+    media_id: Mapped[int] = mapped_column(
+        ForeignKey(
+            "medias.id",
+            ondelete="CASCADE",
+        ),
+        primary_key=True,
+        nullable=False,
+    )
+
+    __table_args__ = (UniqueConstraint("tweet_id", "media_id", name="unique_media_tweet"),)
+
+
 class Tweets(BaseModel):
     """Sqlalchemy table class.
 
@@ -66,37 +97,6 @@ class Medias(BaseModel):
         back_populates="medias",
         lazy="selectin",
     )
-
-
-class MediasTweets(BaseModel):
-    """Sqlalchemy association table class.
-
-    __tablename__: medias_tweets
-
-    tweet_id (int): tweet id (ForeignKey)
-    media_id (int): id of the tweet media (ForeignKey)
-    """
-    __tablename__ = "medias_tweets"
-    metadata = base_metadata
-
-    tweet_id: Mapped[int] = mapped_column(
-        ForeignKey(
-            "tweets.id",
-            ondelete="CASCADE",
-        ),
-        primary_key=True,
-        nullable=False,
-    )
-    media_id: Mapped[int] = mapped_column(
-        ForeignKey(
-            "medias.id",
-            ondelete="CASCADE",
-        ),
-        primary_key=True,
-        nullable=False,
-    )
-
-    __table_args__ = (UniqueConstraint("tweet_id", "media_id", name="unique_media_tweet"),)
 
 
 class Likes(BaseModel):
