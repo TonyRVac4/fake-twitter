@@ -170,7 +170,7 @@ class FollowersMethods(Followers):
                     )
                     await session.execute(del_expr)
                     await session.commit()
-                    result, code = {"result": True}, 204
+                    result, code = {"result": True}, 200
                 else:
                     result, code = {
                         "result": False,

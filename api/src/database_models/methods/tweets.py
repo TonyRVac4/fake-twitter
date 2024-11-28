@@ -46,7 +46,7 @@ class TweetsMethods(Tweets):
 
     @classmethod
     async def get_posts_list(
-        cls, user_id: int, async_session: AsyncSession,
+        cls, async_session: AsyncSession,
     ) -> ResponseData:
         """Return posts from followed pages for user by id.
 
@@ -164,7 +164,7 @@ class TweetsMethods(Tweets):
                         del_expr = delete(Tweets).where(Tweets.id == tweet_id)
                         await session.execute(del_expr)
                         await session.commit()
-                        result, code = {"result": True}, 204
+                        result, code = {"result": True}, 200
                     else:
                         result, code = {
                             "result": False,
@@ -261,7 +261,7 @@ class LikesMethods(Likes):
                     )
                     await session.execute(expression)
                     await session.commit()
-                    result, code = {"result": True}, 204
+                    result, code = {"result": True}, 200
                 else:
                     result, code = {
                         "result": False,

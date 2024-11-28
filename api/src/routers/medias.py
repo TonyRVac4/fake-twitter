@@ -59,7 +59,6 @@ async def upload_media_from_post(
         )
 
     save_link_result: ResponseData = await MediasMethods.add(
-        tweet_id=tweet_id,
         link=media_upload_result.response["link"],
         async_session=session,
     )
