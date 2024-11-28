@@ -33,7 +33,7 @@ async def posts_list(
     """
     user_id = request.state.user_id
 
-    tweets_data: ResponseData = await TweetsMethods.get_posts_for_user(
+    tweets_data: ResponseData = await TweetsMethods.get_posts_list(
         user_id=user_id,
         async_session=session,
     )
