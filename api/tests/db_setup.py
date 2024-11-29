@@ -17,7 +17,7 @@ async def setup_test_data(async_session: AsyncSession):
         user_follower1 = Users(username="jack follower", email="grqefwdsa@gmail.com")
         user_follower2 = Users(username="mark follower", email="ewfaEgr4@gmail.com")
         session.add_all([user1, user2, user3, user_follower1, user_follower2])
-
+        await session.commit()
         follow1 = Followers(user_id=user1.id, follower_id=user_follower1.id)
         follow2 = Followers(user_id=user2.id, follower_id=user_follower2.id)
         session.add_all([follow1, follow2])
@@ -47,11 +47,10 @@ async def setup_test_data(async_session: AsyncSession):
         )
         session.add_all([tweet1, tweet2, tweet3, tweet4, tweet5])
         session.add_all([image1, image2, image3, image4])
+        await session.commit()
 
         relation1 = MediasTweets(tweet_id=tweet4.id, media_id=image1.id)
         relation2 = MediasTweets(tweet_id=tweet4.id, media_id=image2.id)
-        session.add_all([relation1, relation2])
-
         key1 = Cookies(
             user_id=user1.id,
             hash=func.crypt("1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p", func.gen_salt("md5")),
@@ -64,5 +63,5 @@ async def setup_test_data(async_session: AsyncSession):
             user_id=user3.id,
             hash=func.crypt("z9x8c7v6b5n4m3l2k1j0h9g8f7d6s5a4", func.gen_salt("md5")),
         )
-        session.add_all([key1, key2, key3])
+        session.add_all([relation1, relation2, key1, key2, key3])
         await session.commit()
