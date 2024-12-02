@@ -61,11 +61,11 @@ class TweetsMethods(Tweets):
                 get_user_expr = select(Tweets)
                 request = await session.execute(get_user_expr)
                 tweets: list = request.scalars().fetchall()
-                result, code = {"result": True, "tweet": []}, 200
+                result, code = {"result": True, "tweets": []}, 200
 
                 if tweets:
                     for tweet in tweets:
-                        result["tweet"].append(
+                        result["tweets"].append(
                             {
                                 "id": tweet.id,
                                 "content": tweet.data,

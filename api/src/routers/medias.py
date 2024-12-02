@@ -1,6 +1,4 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, Form, UploadFile
+from fastapi import APIRouter, Depends, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,7 +16,6 @@ router = APIRouter(
 
 @router.post("", response_model=MediaUploadResponseDataWithId)
 async def upload_media_from_post(
-    tweet_id: Annotated[int, Form()],
     file: UploadFile,
     session: AsyncSession = Depends(get_async_session),
     s3_client: Client = Depends(get_async_s3_client),
@@ -29,10 +26,8 @@ async def upload_media_from_post(
         api-key: str
         form-data:
         - file: binary
-        - tweet_id: int
 
     Parameters:
-        tweet_id: form-data (int)
         file: FastAPI.UploadFile
         session: Async session
         s3_client: Async client for work with s3 storage
@@ -40,15 +35,6 @@ async def upload_media_from_post(
     Returns:
         JSONResponse: результат загрузки файла и идентификатором медиа.
     """
-    check_tweet_exist: ResponseData = await TweetsMethods.get(
-        tweet_id=tweet_id, async_session=session,
-    )
-    if not check_tweet_exist.response["result"]:
-        return JSONResponse(
-            content=jsonable_encoder(check_tweet_exist.response),
-            status_code=check_tweet_exist.status_code,
-        )
-
     media_upload_result: ResponseData = await s3_client.upload(
         file_obj=file.file, filename=file.filename,
     )

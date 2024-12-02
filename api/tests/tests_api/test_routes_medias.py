@@ -14,12 +14,10 @@ async def test_upload_media_from_post(ac: AsyncClient):
     with open("tests/medias/cat1.jpg", "rb") as file:
         b_file: bytes = file.read()
 
-    form_data = {"tweet_id": 1}
     file_data = ("test_image.png", b_file, "image/jpg")
 
     request = await ac.post(
         url="/api/medias",
-        data=form_data,
         files={"file": file_data},
         headers={"api-key": "1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"},
     )
