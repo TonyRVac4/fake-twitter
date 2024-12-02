@@ -52,7 +52,7 @@ migration:
     - echo 'S3_URL='$S3_URL >> .env
     - echo 'S3_BUCKET_NANE='$S3_BUCKET_NANE >> .env
   script:
-    - docker run --rm --env-file prod-backend-image bash -c "alembic upgrade head"
+    - docker run --rm --env-file .env prod-backend-image bash -c "alembic upgrade head"
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'
     - when: never
