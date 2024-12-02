@@ -1,6 +1,19 @@
 services:
+  nginx:
+    restart: always
+    image: nginx:1-alpine
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./frontend:/usr/share/nginx/html
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - dev
   backend:
-    image: my-backend-image:latest
+    restart: always
+    image: prod-backend-image
     build:
       context: ./api
     container_name: my-backend-container
@@ -16,5 +29,9 @@ services:
       - S3_URL=${S3_URL}
       - S3_BUCKET_NANE=${S3_BUCKET_NANE}
     ports:
-      - "80:80"
-    command: "uvicorn main:app --host 0.0.0.0 --port 80"
+      - "5555:5555"
+    command: "uvicorn main:app --host 0.0.0.0 --port 5555"
+    networks:
+      - dev
+networks:
+  dev:
