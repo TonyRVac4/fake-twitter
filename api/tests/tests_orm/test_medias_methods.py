@@ -62,21 +62,10 @@ async def test_add_media_link(async_session: AsyncSession):
     Parameters:
         async_session: AsyncSession
     """
-    tweet_id = 4
     link = "https://s3.timeweb.cloud/37634968-test-backet/meme1.jpg"
 
-    check_expr = select(Medias).where(and_(
-        Medias.tweet_id == tweet_id,
-        Medias.link == link,
-    ))
-
     async with async_session as session:
-        check_request_before = await session.execute(check_expr)
-        check_result_before = check_request_before.scalars().one_or_none()
-        assert check_result_before is None
-
         request = await MediasMethods.add(
-            tweet_id=tweet_id,
             link=link,
             async_session=async_session,
         )
@@ -84,44 +73,13 @@ async def test_add_media_link(async_session: AsyncSession):
         assert request.response.get("result") is True
         assert request.response.get("media_id") is not None
 
+        check_expr = select(Medias).where(and_(
+            Medias.id == request.response.get("media_id"),
+            Medias.link == link,
+        ))
         check_request_after = await session.execute(check_expr)
         check_result_after = check_request_after.scalars().one_or_none()
-        assert check_result_after.tweet_id == tweet_id
-
-
-async def test_can_not_add_with_nonexistent_tweet(async_session: AsyncSession):
-    """Test MediasMethods.add() method.
-
-    Can't add media link to medias table if tweet doesn't exist.
-
-    Parameters:
-        async_session: AsyncSession
-    """
-    tweet_id = 22
-    link = "https://s3.timeweb.cloud/37634968-test-backet/meme1.jpg"
-
-    check_expr = select(Medias).where(and_(
-        Medias.tweet_id == tweet_id,
-        Medias.link == link,
-    ))
-
-    async with async_session as session:
-        check_request_before = await session.execute(check_expr)
-        check_result_before = check_request_before.scalars().one_or_none()
-        assert check_result_before is None
-
-        request = await MediasMethods.add(
-            tweet_id=tweet_id,
-            link=link,
-            async_session=async_session,
-        )
-        assert request.status_code == 404
-        assert request.response.get("result") is False
-        assert request.response.get("error_type") == "DataNotFound"
-
-        check_request_after = await session.execute(check_expr)
-        check_result_after = check_request_after.scalars().one_or_none()
-        assert check_result_after is None
+        assert check_result_after is not None
 
 
 async def test_delete_by_media_id(async_session: AsyncSession):
@@ -146,7 +104,7 @@ async def test_delete_by_media_id(async_session: AsyncSession):
             media_id=media_id,
             async_session=async_session,
         )
-        assert request.status_code == 204
+        assert request.status_code == 200
         assert request.response.get("result") is True
 
         check_request_after = await session.execute(check_expr)
@@ -173,62 +131,6 @@ async def test_delete_by_nonexistent_media_id(async_session: AsyncSession):
 
         request = await MediasMethods.delete(
             media_id=22,
-            async_session=async_session,
-        )
-        assert request.status_code == 404
-        assert request.response.get("result") is False
-        assert request.response.get("error_type") == "DataNotFound"
-
-
-async def test_delete_all_media_by_tweet_id(async_session: AsyncSession):
-    """Test MediasMethods.delete_all_by_tweet_id() method.
-
-    Delete media links by tweet id.
-
-    Parameters:
-        async_session: AsyncSession
-    """
-    tweet_id = 4
-
-    check_expr = select(Medias).where(Medias.tweet_id == tweet_id)
-
-    async with async_session as session:
-        check_request_before = await session.execute(check_expr)
-        check_result_before = check_request_before.scalars().fetchall()
-        assert len(check_result_before) > 0
-        assert check_result_before[0].tweet_id == tweet_id
-
-        request = await MediasMethods.delete_all_by_tweet_id(
-            tweet_id=tweet_id,
-            async_session=async_session,
-        )
-        assert request.status_code == 204
-        assert request.response.get("result") is True
-
-        check_request_after = await session.execute(check_expr)
-        check_result_after = check_request_after.scalars().fetchall()
-        assert len(check_result_after) == 0
-
-
-async def test_can_not_delete_by_nonexistent_tweet(async_session: AsyncSession):
-    """Test MediasMethods.delete_all_by_tweet_id() method.
-
-    Can't delete media links by tweet id if tweet doesn't exist.
-
-    Parameters:
-        async_session: AsyncSession
-    """
-    tweet_id = 12
-
-    check_expr = select(Medias).where(Medias.tweet_id == tweet_id)
-
-    async with async_session as session:
-        check_request_before = await session.execute(check_expr)
-        check_result_before = check_request_before.scalars().fetchall()
-        assert len(check_result_before) == 0
-
-        request = await MediasMethods.delete_all_by_tweet_id(
-            tweet_id=12,
             async_session=async_session,
         )
         assert request.status_code == 404

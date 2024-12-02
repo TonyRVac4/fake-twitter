@@ -1,12 +1,16 @@
 fastapi
 uvicorn
 pydantic
+pytest
+pytest-asyncio
 httpx
 sqlalchemy[asyncio]
 greenlet
 asyncpg
 alembic
+black
 python-multipart
 aiobotocore
 types-aiobotocore-s3
 certifi
+wemake-python-styleguide

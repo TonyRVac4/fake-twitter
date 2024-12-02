@@ -6,6 +6,40 @@ from sqlalchemy.types import VARCHAR
 from database_models.db_config import BaseModel, base_metadata  # noqa
 
 
+class MediasTweets(BaseModel):
+    """Sqlalchemy association table class.
+
+    __tablename__: medias_tweets
+
+    tweet_id (int): tweet id (ForeignKey)
+    media_id (int): id of the tweet media (ForeignKey)
+    """
+
+    __tablename__ = "medias_tweets"
+    metadata = base_metadata
+
+    tweet_id: Mapped[int] = mapped_column(
+        ForeignKey(
+            "tweets.id",
+            ondelete="CASCADE",
+        ),
+        primary_key=True,
+        nullable=False,
+    )
+    media_id: Mapped[int] = mapped_column(
+        ForeignKey(
+            "medias.id",
+            ondelete="CASCADE",
+        ),
+        primary_key=True,
+        nullable=False,
+    )
+
+    __table_args__ = (
+        UniqueConstraint("tweet_id", "media_id", name="unique_media_tweet"),
+    )
+
+
 class Tweets(BaseModel):
     """Sqlalchemy table class.
 
@@ -28,7 +62,10 @@ class Tweets(BaseModel):
     data: Mapped[str] = mapped_column(VARCHAR(1000), nullable=False)
 
     medias: Mapped[List["Medias"]] = relationship(
-        back_populates="tweet", uselist=True, lazy="selectin",
+        secondary="medias_tweets",
+        back_populates="tweets",
+        uselist=True,
+        lazy="selectin",
     )
     user: Mapped["Users"] = relationship(
         back_populates="tweets", uselist=True, lazy="selectin",
@@ -47,8 +84,7 @@ class Medias(BaseModel):
     __tablename__: medias
 
     id (int): ID (primary_key, autoincrement)
-    tweet_id (int): id of the tweet (ForeignKey)
-    data (str): no idea
+    link (str): link to the media in the s3 storage
     """
 
     __tablename__ = "medias"
@@ -57,16 +93,13 @@ class Medias(BaseModel):
     id: Mapped[int] = mapped_column(
         primary_key=True, nullable=False, autoincrement=True,
     )
-    tweet_id: Mapped[int] = mapped_column(
-        ForeignKey(
-            "tweets.id",
-            ondelete="CASCADE",
-        ),
-        nullable=False,
-    )
     link: Mapped[str] = mapped_column(VARCHAR(150), nullable=False)
 
-    tweet: Mapped["Tweets"] = relationship(back_populates="medias")
+    tweets: Mapped[List["Tweets"]] = relationship(
+        secondary="medias_tweets",
+        back_populates="medias",
+        lazy="selectin",
+    )
 
 
 class Likes(BaseModel):

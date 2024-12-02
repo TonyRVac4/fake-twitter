@@ -1,7 +1,8 @@
-from database_models.db_config import ResponseData, get_async_session
-from database_models.methods.users import CookiesMethods
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from database_models.db_config import ResponseData, get_async_session
+from database_models.methods.users import CookiesMethods
 
 
 async def api_key_check_dependency(

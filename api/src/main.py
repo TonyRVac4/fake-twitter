@@ -4,6 +4,7 @@ import uvicorn
 from fastapi import Depends, FastAPI, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+
 from middleware import api_key_check_dependency
 from routers import medias, tweets, users
 
@@ -16,7 +17,7 @@ app.include_router(users.router)
 app.include_router(medias.router)
 
 
-@app.get("/")
+@app.get("/api")
 async def root():
     """Root endpoint.
 

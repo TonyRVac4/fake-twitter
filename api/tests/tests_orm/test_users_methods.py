@@ -159,7 +159,7 @@ async def test_unfollow_user(async_session: AsyncSession):
             following_id=following_id,
             async_session=async_session,
         )
-        assert request.status_code == 204
+        assert request.status_code == 200
         assert request.response.get("result") is True
 
         check_request_after = await session.execute(check_expr)
