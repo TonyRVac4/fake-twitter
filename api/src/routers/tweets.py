@@ -17,7 +17,7 @@ router = APIRouter(
 
 @router.get("")
 async def posts_list(
-    request: Request, session: AsyncSession = Depends(get_async_session),
+    session: AsyncSession = Depends(get_async_session),
 ):
     """Return list of posts for user.
 
@@ -25,16 +25,12 @@ async def posts_list(
         api-key: str
 
     Parameters:
-        request: FastAPI Request object
         session: dependency - Async session
 
     Returns:
         JSON: результат запроса и список словорей с постами.
     """
-    user_id = request.state.user_id
-
-    tweets_data: ResponseData = await TweetsMethods.get_posts_for_user(
-        user_id=user_id,
+    tweets_data: ResponseData = await TweetsMethods.get_posts_list(
         async_session=session,
     )
     return JSONResponse(
@@ -67,7 +63,7 @@ async def add_new_post(
 
     result: ResponseData = await TweetsMethods.add(
         user_id=user_id,
-        text=new_tweet["tweet_data"],
+        data=new_tweet,
         async_session=session,
     )
     return JSONResponse(
@@ -107,7 +103,7 @@ async def delete_post(
         tweet_id=post_id,
         async_session=session,
     )
-    if del_from_db_res.response["result"] and get_tweet_media.response["links"]:
+    if del_from_db_res.response["result"] and get_tweet_media.response["result"]:
         file_names: list = [
             S3utils.get_name_from_link(link)
             for link in get_tweet_media.response["links"]

@@ -44,13 +44,29 @@ async def test_create_new_post(ac: AsyncClient):
     Parameters:
         ac: AsyncClient
     """
-    test_data: dict = {"tweet_data": "string", "tweet_media_ids": [0, 1]}
+    test_data: dict = {"tweet_data": "string", "tweet_media_ids": [1, 2]}
 
     request = await ac.post(
         url, json=test_data, headers={"api-key": "1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"},
     )
     assert request.status_code == 201
     assert request.json().get("result") is True
+
+
+async def test_cant_create_post_with_nonexistent_medias(ac: AsyncClient):
+    """Test POST /api/medias endpoint works.
+
+    Parameters:
+        ac: AsyncClient
+    """
+    test_data: dict = {"tweet_data": "string", "tweet_media_ids": [5, 6]}
+
+    request = await ac.post(
+        url, json=test_data, headers={"api-key": "1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"},
+    )
+    assert request.status_code == 404
+    assert request.json().get("result") is False
+    assert request.json().get("error_type") == "DataNotFound"
 
 
 async def test_delete_post(ac: AsyncClient):
@@ -64,7 +80,7 @@ async def test_delete_post(ac: AsyncClient):
         headers={"api-key": "1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"},
     )
 
-    assert request.status_code == 204
+    assert request.status_code == 200
     assert request.json().get("result") is True
 
 
@@ -145,7 +161,7 @@ async def test_unlike_post(ac: AsyncClient):
         url + "/{post_id}/likes".format(post_id=2),
         headers={"api-key": "1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"},
     )
-    assert request.status_code == 204
+    assert request.status_code == 200
     assert request.json().get("result") is True
 
 

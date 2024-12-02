@@ -9,9 +9,8 @@ services:
       - '5432:5432'
     networks:
       - app_network
-
   tests:
-    image: my-backend-image:latest
+    image: dev-backend-image:latest
     build:
       context: .
     command: pytest app/tests -s -v -p no:warnings
