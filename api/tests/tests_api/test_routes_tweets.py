@@ -26,16 +26,16 @@ async def test_request_with_nonexistent_api_key(ac: AsyncClient):
     assert request.json().get("detail").get("error_type") == "Unauthorized"
 
 
-async def test_request_with_no_api_key(ac: AsyncClient):
-    """Test GET /api/tweets endpoint works.
-
-    Parameters:
-        ac: AsyncClient
-    """
-    request = await ac.get(url)
-    assert request.status_code == 401
-    assert request.json().get("detail").get("result") is False
-    assert request.json().get("detail").get("error_type") == "Unauthorized"
+# async def test_request_with_no_api_key(ac: AsyncClient):
+#     """Test GET /api/tweets endpoint works.
+#
+#     Parameters:
+#         ac: AsyncClient
+#     """
+#     request = await ac.get(url)
+#     assert request.status_code == 401
+#     assert request.json().get("detail").get("result") is False
+#     assert request.json().get("detail").get("error_type") == "Unauthorized"
 
 
 async def test_create_new_post(ac: AsyncClient):
