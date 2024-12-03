@@ -8,7 +8,6 @@ required_s3_env_vars = ["S3_ACCESS_KEY", "S3_SECRET_KEY", "S3_URL", "S3_BUCKET_N
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
 load_dotenv(dotenv_path=env_path)
 
-
 if all(var in os.environ for var in required_db_env_vars):
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT")

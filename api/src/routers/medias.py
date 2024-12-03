@@ -22,11 +22,6 @@ async def upload_media_from_post(
 ):
     """Endpoint для загрузки файлов из твита.
 
-    HTTP-Params:
-        api-key: str
-        form-data:
-        - file: binary
-
     Parameters:
         file: FastAPI.UploadFile
         session: Async session
