@@ -1,18 +1,13 @@
 services:
   nginx:
+    build:
+      context: .
     restart: always
-    image: nginx:1-alpine
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./frontend:/usr/share/nginx/html
-    ports:
-      - "80:80"
     depends_on:
       - backend
     networks:
       - dev
   backend:
-    restart: always
     image: prod-backend-image
     build:
       context: ./api
@@ -31,6 +26,7 @@ services:
     ports:
       - "5555:5555"
     command: "uvicorn main:app --host 0.0.0.0 --port 5555"
+    restart: always
     networks:
       - dev
 networks:
