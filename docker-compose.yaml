@@ -3,12 +3,14 @@ services:
     build:
       context: .
     restart: always
+    ports:
+      - "80:80"
     depends_on:
       - backend
     networks:
       - dev
   backend:
-    image: prod-backend-image
+    image: prod-backend-image:latest
     build:
       context: ./api
     container_name: my-backend-container
