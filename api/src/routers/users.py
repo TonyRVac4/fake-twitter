@@ -31,18 +31,10 @@ async def follow_user(
     Returns:
         JSONResponse: результат выполнения опереации.
     """
-    api_key: str = request.headers.get("api-key")
-    check_api_key: ResponseData = await CookiesMethods.get_user_id(
-        api_key, session,
-    )
-    if not check_api_key.response["result"]:
-        return JSONResponse(
-            content=jsonable_encoder(check_api_key.response),
-            status_code=check_api_key.status_code,
-        )
+    follower_id = request.state.user_id
 
     result: ResponseData = await FollowersMethods.add(
-        follower_id=check_api_key.response["user_id"],
+        follower_id=follower_id,
         following_id=user_id,
         async_session=session,
     )
@@ -71,18 +63,10 @@ async def unfollow_user(
     Returns:
         JSONResponse: результат выполнения опереации.
     """
-    api_key: str = request.headers.get("api-key")
-    check_api_key: ResponseData = await CookiesMethods.get_user_id(
-        api_key, session,
-    )
-    if not check_api_key.response["result"]:
-        return JSONResponse(
-            content=jsonable_encoder(check_api_key.response),
-            status_code=check_api_key.status_code,
-        )
+    follower_id = request.state.user_id
 
     result: ResponseData = await FollowersMethods.delete(
-        follower_id=check_api_key.response["user_id"],
+        follower_id=follower_id,
         following_id=user_id,
         async_session=session,
     )
@@ -109,18 +93,10 @@ async def self_profile_info(
     Returns:
         JSON: результат запроса и информацию о пользователе.
     """
-    api_key: str = request.headers.get("api-key")
-    check_api_key: ResponseData = await CookiesMethods.get_user_id(
-        api_key, session,
-    )
-    if not check_api_key.response["result"]:
-        return JSONResponse(
-            content=jsonable_encoder(check_api_key.response),
-            status_code=check_api_key.status_code,
-        )
+    user_id = request.state.user_id
 
     result: ResponseData = await UsersMethods.get_info_by_id(
-        user_id=check_api_key.response["user_id"],
+        user_id=user_id,
         async_session=session,
     )
     return JSONResponse(
@@ -132,7 +108,6 @@ async def self_profile_info(
 @router.get("/{user_id}", response_model=UserProfileDataOut)
 async def user_profile_info_by_id(
     user_id: int,
-    request: Request,
     session: AsyncSession = Depends(get_async_session),
 ):
     """Return user's profile information.
@@ -142,22 +117,11 @@ async def user_profile_info_by_id(
 
     Parameters:
         user_id: int
-        request: FastAPI Request object
         session: Async session
 
     Returns:
         JSONResponse: результат запроса и информацию о пользователе.
     """
-    api_key: str = request.headers.get("api-key")
-    check_api_key: ResponseData = await CookiesMethods.get_user_id(
-        api_key, session,
-    )
-    if not check_api_key.response["result"]:
-        return JSONResponse(
-            content=jsonable_encoder(check_api_key.response),
-            status_code=check_api_key.status_code,
-        )
-
     result: ResponseData = await UsersMethods.get_info_by_id(
         user_id=user_id,
         async_session=session,

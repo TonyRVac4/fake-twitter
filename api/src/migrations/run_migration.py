@@ -10,3 +10,7 @@ def apply_head_migration() -> None:
     """Run head migration."""
     alembic_cfg = Config("alembic.ini")
     command.upgrade(alembic_cfg, "head")
+
+
+if __name__ == "__main__":
+    apply_head_migration()

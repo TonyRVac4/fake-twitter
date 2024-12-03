@@ -12,43 +12,63 @@ build-job:
   tags:
     - docker
   script:
-    - docker build -t my-backend-image api/
+    - docker build -t prod-backend-image -f api/Dockerfile-prod api/
+    - docker build -t dev-backend-image -f api/Dockerfile-dev api/
 
 unittest:
   stage: testing
   tags:
     - docker
   before_script:
-    - echo 'S3_ACCESS_KEY='S3_ACCESS_KEY >> .env
-    - echo 'S3_SECRET_KEY='S3_SECRET_KEY >> .env
-    - echo 'S3_URL='S3_URL >> .env
-    - echo 'TEST_S3_BUCKET_NANE='S3_BUCKET_NANE >> .env
+    - echo 'S3_ACCESS_KEY='$S3_ACCESS_KEY >> .env
+    - echo 'S3_SECRET_KEY='$S3_SECRET_KEY >> .env
+    - echo 'S3_URL='$S3_URL >> .env
+    - echo 'TEST_S3_BUCKET_NANE='$S3_BUCKET_NANE >> .env
   script:
     - docker compose -f api/tests/docker-compose-test.yaml up --abort-on-container-exit
   after_script:
     - docker compose -f api/tests/docker-compose-test.yaml down --remove-orphans
 
-wemake-python-styleguide:
+linter:
   stage: testing
   tags:
     - docker
-  script: docker run --rm my-backend-image bash -c "pip install wemake-python-styleguide && flake8 app/"
+  script:
+    - docker run --rm dev-backend-image bash -c "cd app && flake8"
 
+migration:
+  stage: deploy
+  tags:
+    - docker
+  before_script:
+    - echo 'DB_HOST='$DB_HOST >> .env
+    - echo 'DB_PORT='$DB_PORT >> .env
+    - echo 'DB_PASS='$DB_PASS >> .env
+    - echo 'DB_USER_NAME='$DB_USER_NAME >> .env
+    - echo 'DB_NAME='$DB_NAME >> .env
+    - echo 'S3_ACCESS_KEY='$S3_ACCESS_KEY >> .env
+    - echo 'S3_SECRET_KEY='$S3_SECRET_KEY >> .env
+    - echo 'S3_URL='$S3_URL >> .env
+    - echo 'S3_BUCKET_NANE='$S3_BUCKET_NANE >> .env
+  script:
+    - docker run --rm --env-file .env prod-backend-image bash -c "alembic upgrade head"
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'
+    - when: never
 deploy-job:
   stage: deploy
   tags:
     - docker
   before_script:
-    - echo 'DB_HOST='DB_HOST >> .env
-    - echo 'DB_PORT='DB_PORT >> .env
-    - echo 'DB_PASS='DB_PASS >> .env
-    - echo 'DB_USER_NAME='DB_USER_NAME >> .env
-    - echo 'DB_NAME='DB_NAME >> .env
-
-    - echo 'S3_ACCESS_KEY='S3_ACCESS_KEY >> .env
-    - echo 'S3_SECRET_KEY='S3_SECRET_KEY >> .env
-    - echo 'S3_URL='S3_URL >> .env
-    - echo 'S3_BUCKET_NANE='S3_BUCKET_NANE >> .env
+    - echo 'DB_HOST='$DB_HOST >> .env
+    - echo 'DB_PORT='$DB_PORT >> .env
+    - echo 'DB_PASS='$DB_PASS >> .env
+    - echo 'DB_USER_NAME='$DB_USER_NAME >> .env
+    - echo 'DB_NAME='$DB_NAME >> .env
+    - echo 'S3_ACCESS_KEY='$S3_ACCESS_KEY >> .env
+    - echo 'S3_SECRET_KEY='$S3_SECRET_KEY >> .env
+    - echo 'S3_URL='$S3_URL >> .env
+    - echo 'S3_BUCKET_NANE='$S3_BUCKET_NANE >> .env
   script: docker compose up -d
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'

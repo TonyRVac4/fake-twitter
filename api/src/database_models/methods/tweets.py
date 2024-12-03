@@ -1,9 +1,8 @@
 from sqlalchemy import and_, delete, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 from database_models.db_config import ResponseData  # noqa
-from database_models.tweets_orm_models import Likes, Medias, Tweets  # noqa
+from database_models.tweets_orm_models import Likes, MediasTweets, Medias, Tweets  # noqa
 from database_models.users_orm_models import Cookies, Followers, Users  # noqa
 
 
@@ -46,13 +45,12 @@ class TweetsMethods(Tweets):
         return ResponseData(response=result, status_code=code)
 
     @classmethod
-    async def get_posts_for_user(
-        cls, user_id: int, async_session: AsyncSession,
+    async def get_posts_list(
+        cls, async_session: AsyncSession,
     ) -> ResponseData:
         """Return posts from followed pages for user by id.
 
         Parameters:
-            user_id: int
             async_session: AsyncSession
 
         Returns:
@@ -60,44 +58,31 @@ class TweetsMethods(Tweets):
         """
         try:
             async with async_session as session:
-                get_user_expr = (
-                    select(Followers).
-                    where(Followers.follower_id == user_id).
-                    options(
-                        selectinload(Followers.user).
-                        selectinload(Users.tweets).
-                        selectinload(Tweets.likes).
-                        selectinload(Likes.user),
-                    )
-                )
+                get_user_expr = select(Tweets)
                 request = await session.execute(get_user_expr)
-                follows: list = request.scalars().fetchall()
+                tweets: list = request.scalars().fetchall()
+                result, code = {"result": True, "tweets": []}, 200
 
-                result, code = {"result": True, "tweet": []}, 200
-
-                if follows:
-                    for follow in follows:
-                        for tweet in follow.user.tweets:
-                            result["tweet"].append(
-                                {
-                                    "id": tweet.id,
-                                    "content": tweet.data,
-                                    "attachments": [
-                                        media.data for media in tweet.medias
-                                    ],
-                                    "author": {
-                                        "id": follow.user.id,
-                                        "name": follow.user.username,
-                                    },
-                                    "likes": [
-                                        {
-                                            "user_id": like.user_id,
-                                            "name": like.user.username,
-                                        }
-                                        for like in tweet.likes
-                                    ],
+                if tweets:
+                    for tweet in tweets:
+                        result["tweets"].append(
+                            {
+                                "id": tweet.id,
+                                "content": tweet.data,
+                                "attachments": [media.link for media in tweet.medias],
+                                "author": {
+                                    "id": tweet.user.id,
+                                    "name": tweet.user.username,
                                 },
-                            )
+                                "likes": [
+                                    {
+                                        "user_id": like.user_id,
+                                        "name": like.user.username,
+                                    }
+                                    for like in tweet.likes
+                                ],
+                            },
+                        )
         except SQLAlchemyError as err:
             result, code = {
                 "result": False,
@@ -109,13 +94,13 @@ class TweetsMethods(Tweets):
 
     @classmethod
     async def add(
-        cls, user_id: int, text: str, async_session: AsyncSession,
+        cls, user_id: int, data: dict, async_session: AsyncSession,
     ) -> ResponseData:
         """Add tweet to tweets table.
 
         Parameters:
             user_id: int
-            text: str
+            data: {"tweet_data": str, "tweet_media_ids": Array[int]}
             async_session: AsyncSession
 
         Returns:
@@ -123,16 +108,31 @@ class TweetsMethods(Tweets):
         """
         try:
             async with async_session as session:
-                new_tweet = Tweets(user_id=user_id, data=text)
+                new_tweet = Tweets(user_id=user_id, data=data["tweet_data"])
                 session.add(new_tweet)
+                await session.flush()
+
+                if data["tweet_media_ids"]:
+                    for m_id in data["tweet_media_ids"]:
+                        new_relation = MediasTweets(
+                            tweet_id=new_tweet.id, media_id=m_id,
+                        )
+                        session.add(new_relation)
                 await session.commit()
                 result, code = {"result": True, "tweet_id": new_tweet.id}, 201
         except SQLAlchemyError as err:
-            result, code = {
-                "result": False,
-                "error_type": "SQLAlchemyError",
-                "error_message": str(err),
-            }, 500
+            if "violates foreign key constraint" in str(err):
+                result, code = {
+                    "result": False,
+                    "error_type": "DataNotFound",
+                    "error_message": "Media does not exist.",
+                }, 404
+            else:
+                result, code = {
+                    "result": False,
+                    "error_type": "SQLAlchemyError",
+                    "error_message": str(err),
+                }, 500
 
         return ResponseData(response=result, status_code=code)
 

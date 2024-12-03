@@ -10,7 +10,7 @@ engine = create_async_engine(DATABASE_URL, poolclass=NullPool)
 async_session = async_sessionmaker(engine, expire_on_commit=False, autoflush=True)
 
 base_metadata = MetaData()
-BaseModel = declarative_base()
+BaseModel = declarative_base(metadata=base_metadata)
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:

@@ -207,7 +207,7 @@ class CookiesMethods(Cookies):
         try:
             async with async_session as session:
                 check_expr = select(Cookies).where(
-                    and_(Cookies.hash == func.crypt(api_key, Cookies.hash)),
+                    Cookies.hash == func.crypt(api_key, Cookies.hash),
                 )
                 request = await session.execute(check_expr)
                 result = request.scalars().one_or_none()
@@ -261,9 +261,9 @@ class CookiesMethods(Cookies):
                 else:
                     result, code = {
                         "result": False,
-                        "error_type": "DataNotFound",
+                        "error_type": "Unauthorized",
                         "error_message": "User with provided api-key not found",
-                    }, 404
+                    }, 401
         except SQLAlchemyError as err:
             result, code = {
                 "result": False,
