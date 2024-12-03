@@ -33,7 +33,7 @@ async def test_add_tweet_with_no_media(async_session: AsyncSession):
 
     request = await TweetsMethods.add(
         user_id=1,
-        text=test_data,
+        data=test_data,
         async_session=async_session,
     )
     tweet_id = request.response.get("tweet_id")
