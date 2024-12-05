@@ -11,8 +11,6 @@ services:
       - dev
   backend:
     image: prod-backend-image:latest
-    build:
-      context: ./api
     container_name: my-backend-container
     working_dir: /app/src
     environment:
