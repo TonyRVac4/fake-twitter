@@ -3,8 +3,8 @@
 import uvicorn
 from fastapi import Depends, FastAPI, status
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from middleware import api_key_check_dependency
 from routers import medias, tweets, users
