@@ -11,7 +11,6 @@ services:
       - dev
   backend:
     image: prod-backend-image:latest
-    container_name: my-backend-container
     working_dir: /app/src
     environment:
       - DB_HOST=${DB_HOST}
@@ -25,7 +24,21 @@ services:
       - S3_BUCKET_NANE=${S3_BUCKET_NANE}
     command: "uvicorn main:app --host 0.0.0.0 --port 5555"
     restart: always
+    depends_on:
+      - redis
     networks:
       - dev
+  redis:
+    image: redis:6.2-alpine
+    command: redis-server --save 20 1 --loglevel warning
+    restart: always
+    volumes:
+      - cache:/data
+    networks:
+      - dev
+
 networks:
   dev:
+volumes:
+  cache:
+    driver: local

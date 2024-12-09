@@ -1,15 +1,39 @@
 """Main file to run the FastAPI app."""
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import Depends, FastAPI, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from redis import asyncio as aioredis
 
 from middleware import api_key_check_dependency
 from routers import medias, tweets, users
+from utils.cache import custom_key_builder
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    """Lifespan event for initializing FastAPICache.
+
+    Yields:
+        None:
+    """
+    redis = aioredis.from_url("redis://redis:6379")
+    FastAPICache.init(
+        RedisBackend(redis),
+        prefix="fastapi-cache",
+        key_builder=custom_key_builder,
+    )
+    yield
+
 
 app = FastAPI(
+    lifespan=lifespan,
     dependencies=[Depends(api_key_check_dependency)],
 )
 
