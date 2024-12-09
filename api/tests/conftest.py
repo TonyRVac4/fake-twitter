@@ -3,6 +3,7 @@ from subprocess import run  # noqa
 from typing import AsyncGenerator
 
 import pytest
+from asgi_lifespan import LifespanManager
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine  # noqa
@@ -119,9 +120,10 @@ async def ac() -> AsyncGenerator[AsyncClient, None]:
     Yields:
         AsyncClient
     """
-    async with AsyncClient(
-        transport=ASGITransport(app=app),
-        base_url="http://test",
-        timeout=2,
-    ) as async_client:
-        yield async_client
+    async with LifespanManager(app):
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+            timeout=2,
+        ) as async_client:
+            yield async_client
