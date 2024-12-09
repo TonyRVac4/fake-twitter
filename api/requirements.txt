@@ -11,3 +11,5 @@ aiobotocore
 types-aiobotocore-s3
 certifi
 python-dotenv
+fastapi-cache2[redis]
+redis

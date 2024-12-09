@@ -15,3 +15,6 @@ types-aiobotocore-s3
 certifi
 wemake-python-styleguide
 python-dotenv
+fastapi-cache2[redis]
+redis
+asgi-lifespan
