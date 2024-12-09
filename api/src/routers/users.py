@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 from database_models.db_config import ResponseData, get_async_session  # noqa
 from database_models.methods.users import UsersMethods  # noqa
@@ -77,6 +78,7 @@ async def unfollow_user(
 
 
 @router.get("/me", response_model=UserProfileDataOut)
+@cache(expire=30)
 async def self_profile_info(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
@@ -99,13 +101,16 @@ async def self_profile_info(
         user_id=user_id,
         async_session=session,
     )
-    return JSONResponse(
-        content=jsonable_encoder(result.response),
-        status_code=result.status_code,
-    )
+    if not result.response["result"]:
+        return JSONResponse(
+            content=jsonable_encoder(result.response),
+            status_code=result.status_code,
+        )
+    return jsonable_encoder(result.response)
 
 
 @router.get("/{user_id}", response_model=UserProfileDataOut)
+@cache(expire=30)
 async def user_profile_info_by_id(
     user_id: int,
     session: AsyncSession = Depends(get_async_session),
@@ -126,7 +131,9 @@ async def user_profile_info_by_id(
         user_id=user_id,
         async_session=session,
     )
-    return JSONResponse(
-        content=jsonable_encoder(result.response),
-        status_code=result.status_code,
-    )
+    if not result.response["result"]:
+        return JSONResponse(
+            content=jsonable_encoder(result.response),
+            status_code=result.status_code,
+        )
+    return jsonable_encoder(result.response)
