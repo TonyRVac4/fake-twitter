@@ -5,6 +5,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import func
 from database_models.db_config import ResponseData  # noqa
 from database_models.users_orm_models import Cookies, Followers, Users  # noqa
+from utils.logger_config import orm_logger  # noqa
 
 
 class UsersMethods(Users):
@@ -72,6 +73,7 @@ class UsersMethods(Users):
                         "error_message": "User does not exist.",
                     }, 404
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             result, code = {
                 "result": False,
                 "error_type": "SQLAlchemyError",
@@ -115,6 +117,7 @@ class FollowersMethods(Followers):
                 await session.commit()
                 result, code = {"result": True}, 201
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             if "duplicate key value violates unique constraint" in str(err):
                 result, code = {
                     "result": False,
@@ -178,6 +181,7 @@ class FollowersMethods(Followers):
                         "error_message": "Follow does not exist.",
                     }, 404
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             result, code = {
                 "result": False,
                 "error_type": "SQLAlchemyError",
@@ -226,6 +230,7 @@ class CookiesMethods(Cookies):
                         "error_message": "Key already exists.",
                     }, 400
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             result, code = {
                 "result": False,
                 "error_type": "SQLAlchemyError",
@@ -265,6 +270,7 @@ class CookiesMethods(Cookies):
                         "error_message": "User with provided api-key not found",
                     }, 401
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             result, code = {
                 "result": False,
                 "error_type": "SQLAlchemyError",
