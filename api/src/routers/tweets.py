@@ -3,7 +3,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from types_aiobotocore_s3 import Client
-from schemas import BaseResponseDataOut, TweetDataIn, TweetResponseWithId  # noqa
+from schemas import BaseResponseDataOut, TweetDataIn  # noqa
+from schemas import TweetResponseWithId, TweetsListDataOut  # noqa
 from database_models.db_config import ResponseData, get_async_session  # noqa
 from database_models.methods.tweets import LikesMethods, TweetsMethods  # noqa
 from database_models.methods.users import CookiesMethods  # noqa
@@ -15,7 +16,7 @@ router = APIRouter(
 )
 
 
-@router.get("")
+@router.get("", response_model=TweetsListDataOut)
 async def posts_list(
     session: AsyncSession = Depends(get_async_session),
 ):
@@ -41,7 +42,7 @@ async def posts_list(
 
 @router.post("", response_model=TweetResponseWithId)
 async def add_new_post(
-    new_tweet_data: TweetDataIn,
+    tweet_data: TweetDataIn,
     request: Request,
     session: AsyncSession = Depends(get_async_session),
 ):
@@ -51,14 +52,14 @@ async def add_new_post(
         api-key: str
 
     Parameters:
-        new_tweet_data: JSON new tweet data
+        tweet_data: JSON new tweet data
         request: FastAPI Request object
         session: Async session
 
     Returns:
         JSONResponse: результат создания поста и идентификатор поста.
     """
-    new_tweet: dict = new_tweet_data.model_dump()
+    new_tweet: dict = tweet_data.model_dump()
     user_id = request.state.user_id
 
     result: ResponseData = await TweetsMethods.add(
