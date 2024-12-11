@@ -38,6 +38,9 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(
     lifespan=lifespan,
     dependencies=[Depends(api_key_check_dependency)],
+    docs_url='/api/docs',
+    redoc_url='/api/redoc',
+    openapi_url='/api/openapi.json',
 )
 
 origins = [
