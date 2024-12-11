@@ -14,7 +14,7 @@ from redis import asyncio as aioredis
 from middleware import api_key_check_dependency
 from routers import medias, tweets, users
 from utils.cache import custom_key_builder
-from api.src.utils.logger_config import api_logger
+from utils.logger_config import api_logger
 
 
 @asynccontextmanager
