@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database_models.db_config import ResponseData  # noqa
 from database_models.tweets_orm_models import Likes, MediasTweets, Medias, Tweets  # noqa
 from database_models.users_orm_models import Cookies, Followers, Users  # noqa
+from utils.logger_config import orm_logger  # noqa
 
 
 class TweetsMethods(Tweets):
@@ -36,6 +37,7 @@ class TweetsMethods(Tweets):
                         "error_message": "Tweet does not exist",
                     }, 404
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             result, code = {
                 "result": False,
                 "error_type": "SQLAlchemyError",
@@ -84,6 +86,7 @@ class TweetsMethods(Tweets):
                             },
                         )
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             result, code = {
                 "result": False,
                 "error_type": "SQLAlchemyError",
@@ -121,6 +124,7 @@ class TweetsMethods(Tweets):
                 await session.commit()
                 result, code = {"result": True, "tweet_id": new_tweet.id}, 201
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             if "violates foreign key constraint" in str(err):
                 result, code = {
                     "result": False,
@@ -176,6 +180,7 @@ class TweetsMethods(Tweets):
                         "error_message": "Tweet doesn't exist.",
                     }, 404
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             result, code = {
                 "result": False,
                 "error_type": "SQLAlchemyError",
@@ -209,6 +214,7 @@ class LikesMethods(Likes):
                 await session.commit()
             result, code = {"result": True}, 201
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             if "duplicate key value violates unique constraint" in str(err):
                 result, code = {
                     "result": False,
@@ -266,6 +272,7 @@ class LikesMethods(Likes):
                         "error_message": "Like doesn't exist.",
                     }, 404
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             result, code = {
                 "result": False,
                 "error_type": "SQLAlchemyError",

@@ -105,8 +105,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-/api/.env
-api/.env
+/api/tests/.env
+api/tests/.env
 /.env
 .env
 .venv
@@ -143,3 +143,4 @@ dmypy.json
 .swp
 
 .DS_Store
+logs/
