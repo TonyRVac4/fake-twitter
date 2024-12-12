@@ -10,6 +10,7 @@ from botocore.exceptions import ClientError
 from types_aiobotocore_s3 import Client  # noqa
 from config import S3_ACCESS_KEY, S3_BUCKET_NANE, S3_SECRET_KEY, S3_URL  # noqa
 from database_models.db_config import ResponseData  # noqa
+from utils.logger_config import s3_logger  # noqa
 
 
 class S3Client:
@@ -85,6 +86,7 @@ class S3Client:
                 "link": link,
             }, 201
         except ClientError as err:
+            s3_logger.exception(str(str))
             result, code = {
                 "result": False,
                 "error_type": "ClientError",
@@ -111,6 +113,7 @@ class S3Client:
                     raise ClientError(operation_name="delete", error_response=res)
             result, code = {"result": True}, 200
         except ClientError as err:
+            s3_logger.exception(str(str))
             result, code = {
                 "result": False,
                 "error_type": "ClientError",
@@ -135,6 +138,7 @@ class S3Client:
                         raise ClientError(operation_name="delete", error_response=res)
             result, code = {"result": True}, 200
         except ClientError as err:
+            s3_logger.exception(str(str))
             result, code = {
                 "result": False,
                 "error_type": "ClientError",

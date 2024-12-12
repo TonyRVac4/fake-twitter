@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -16,6 +18,13 @@ class UserBaseData(BaseModel):
     name: str
 
 
+class UserBaseDataV2(BaseModel):
+    """Class with basic user info (id, name)."""
+
+    user_id: int
+    name: str
+
+
 class TweetDataIn(BaseModel):
     """Class for validation incoming new post data."""
 
@@ -27,6 +36,22 @@ class TweetResponseWithId(BaseResponseDataOut):
     """Class extends basic response with tweed_id."""
 
     tweet_id: int
+
+
+class TweetFullData(BaseModel):
+    """Class response with full info about tweet."""
+
+    id: int
+    content: str
+    attachments: List[str]
+    author: UserBaseData
+    likes: List[UserBaseDataV2]
+
+
+class TweetsListDataOut(BaseResponseDataOut):
+    """Class extends basic response with tweets list."""
+
+    tweets: List[TweetFullData]
 
 
 class MediaUploadResponseDataWithId(BaseResponseDataOut):
