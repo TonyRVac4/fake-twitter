@@ -14,6 +14,7 @@ from redis import asyncio as aioredis
 from middleware import api_key_check_dependency
 from routers import medias, tweets, users
 from utils.cache import custom_key_builder
+from utils.logger_config import api_logger
 
 
 @asynccontextmanager
@@ -23,6 +24,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     Yields:
         None:
     """
+    api_logger.info("FastAPI app started!")
     redis = aioredis.from_url("redis://redis:6379")
     FastAPICache.init(
         RedisBackend(redis),
@@ -30,11 +32,15 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         key_builder=custom_key_builder,
     )
     yield
+    api_logger.info("FastAPI app stopped!")
 
 
 app = FastAPI(
     lifespan=lifespan,
     dependencies=[Depends(api_key_check_dependency)],
+    docs_url='/api/docs',
+    redoc_url='/api/redoc',
+    openapi_url='/api/openapi.json',
 )
 
 origins = [
