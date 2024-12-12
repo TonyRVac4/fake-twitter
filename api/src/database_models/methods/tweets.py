@@ -1,6 +1,7 @@
 from sqlalchemy import and_, delete, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from database_models.db_config import ResponseData  # noqa
 from database_models.tweets_orm_models import Likes, MediasTweets, Medias, Tweets  # noqa
 from database_models.users_orm_models import Cookies, Followers, Users  # noqa
@@ -48,11 +49,12 @@ class TweetsMethods(Tweets):
 
     @classmethod
     async def get_posts_list(
-        cls, async_session: AsyncSession,
+        cls, user_id: int, async_session: AsyncSession,
     ) -> ResponseData:
         """Return posts from followed pages for user by id.
 
         Parameters:
+            user_id: int
             async_session: AsyncSession
 
         Returns:
@@ -60,31 +62,74 @@ class TweetsMethods(Tweets):
         """
         try:
             async with async_session as session:
-                get_user_expr = select(Tweets)
-                request = await session.execute(get_user_expr)
-                tweets: list = request.scalars().fetchall()
-                result, code = {"result": True, "tweets": []}, 200
+                get_follows_expr = (
+                    select(Followers).
+                    where(Followers.follower_id == user_id).
+                    options(
+                        selectinload(Followers.user).
+                        selectinload(Users.tweets).
+                        selectinload(Tweets.likes).
+                        selectinload(Likes.user),
+                    )
+                )
+                get_users_posts = select(Tweets).where(Tweets.user_id == user_id)
+                get_follows_request = await session.execute(get_follows_expr)
+                get_users_posts_request = await session.execute(get_users_posts)
+                follows: list = get_follows_request.scalars().fetchall()
+                users_posts: list = get_users_posts_request.scalars().fetchall()
 
-                if tweets:
-                    for tweet in tweets:
-                        result["tweets"].append(
+                tweets: list = []
+
+                if follows:
+                    for follow in follows:
+                        for tweet in follow.user.tweets:
+                            tweets.append(
+                                {
+                                    "id": tweet.id,
+                                    "content": tweet.data,
+                                    "attachments": [
+                                        media.link for media in tweet.medias
+                                    ],
+                                    "author": {
+                                        "id": tweet.user.id,
+                                        "name": tweet.user.username,
+                                    },
+                                    "likes": [
+                                        {
+                                            "user_id": like.user_id,
+                                            "name": like.user.username,
+                                        }
+                                        for like in tweet.likes
+                                    ],
+                                },
+                            )
+                if users_posts:
+                    for user_tweet in users_posts:
+                        tweets.append(
                             {
-                                "id": tweet.id,
-                                "content": tweet.data,
-                                "attachments": [media.link for media in tweet.medias],
+                                "id": user_tweet.id,
+                                "content": user_tweet.data,
+                                "attachments": [
+                                    media.link for media in user_tweet.medias
+                                ],
                                 "author": {
-                                    "id": tweet.user.id,
-                                    "name": tweet.user.username,
+                                    "id": user_tweet.user.id,
+                                    "name": user_tweet.user.username,
                                 },
                                 "likes": [
                                     {
                                         "user_id": like.user_id,
                                         "name": like.user.username,
                                     }
-                                    for like in tweet.likes
+                                    for like in user_tweet.likes
                                 ],
                             },
                         )
+
+                sorted_tweets = sorted(
+                    tweets, key=lambda i_tweet: len(i_tweet["likes"]), reverse=True,
+                )
+                result, code = {"result": True, "tweets": sorted_tweets}, 200
         except SQLAlchemyError as err:
             orm_logger.exception(str(err))
             result, code = {
@@ -97,7 +142,10 @@ class TweetsMethods(Tweets):
 
     @classmethod
     async def add(
-        cls, user_id: int, data: dict, async_session: AsyncSession,
+        cls,
+        user_id: int,
+        data: dict,
+        async_session: AsyncSession,
     ) -> ResponseData:
         """Add tweet to tweets table.
 
@@ -118,7 +166,8 @@ class TweetsMethods(Tweets):
                 if data["tweet_media_ids"]:
                     for m_id in data["tweet_media_ids"]:
                         new_relation = MediasTweets(
-                            tweet_id=new_tweet.id, media_id=m_id,
+                            tweet_id=new_tweet.id,
+                            media_id=m_id,
                         )
                         session.add(new_relation)
                 await session.commit()
@@ -142,7 +191,10 @@ class TweetsMethods(Tweets):
 
     @classmethod
     async def delete(
-        cls, user_id: int, tweet_id: int, async_session: AsyncSession,
+        cls,
+        user_id: int,
+        tweet_id: int,
+        async_session: AsyncSession,
     ) -> ResponseData:
         """Delete tweet from tweets table.
 
@@ -170,8 +222,7 @@ class TweetsMethods(Tweets):
                         result, code = {
                             "result": False,
                             "error_type": "ActionForbidden",
-                            "error_message":
-                                "You can not delete other people's tweets!",
+                            "error_message": "You can not delete other people's tweets!",
                         }, 401
                 else:
                     result, code = {
@@ -195,7 +246,10 @@ class LikesMethods(Likes):
 
     @classmethod
     async def add(
-        cls, user_id: int, tweet_id: int, async_session: AsyncSession,
+        cls,
+        user_id: int,
+        tweet_id: int,
+        async_session: AsyncSession,
     ) -> ResponseData:
         """Add like to likes table.
 
@@ -238,7 +292,10 @@ class LikesMethods(Likes):
 
     @classmethod
     async def delete(
-        cls, user_id: int, tweet_id: int, async_session: AsyncSession,
+        cls,
+        user_id: int,
+        tweet_id: int,
+        async_session: AsyncSession,
     ) -> ResponseData:
         """Delete like from likes table.
 

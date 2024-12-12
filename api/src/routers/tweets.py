@@ -18,6 +18,7 @@ router = APIRouter(
 
 @router.get("", response_model=TweetsListDataOut)
 async def posts_list(
+    request: Request,
     session: AsyncSession = Depends(get_async_session),
 ):
     """Return list of posts for user.
@@ -26,13 +27,15 @@ async def posts_list(
         api-key: str
 
     Parameters:
+        request: FastAPI Request object
         session: dependency - Async session
 
     Returns:
         JSON: результат запроса и список словорей с постами.
     """
+    user_id: int = request.state.user_id
     tweets_data: ResponseData = await TweetsMethods.get_posts_list(
-        async_session=session,
+        user_id=user_id, async_session=session,
     )
     return JSONResponse(
         content=jsonable_encoder(tweets_data.response),
