@@ -29,7 +29,7 @@
 ### Особенности работы
 Поскольку данная версия прииложения не имеет систему аутентификации используется небольшая фронтенд форма, в которую мы можем подставить api ключ для пользователя на бэкенде.
 
-![Keys][work-with_keys-screenshot]
+![Keys][key-form-example-screenshot]
 
 Все endpoint имеют `http-header` с названием `api-key` и frontend автоматически будет подставлять его. 
 Ключ вы можете подставить совершенно любой, главное чтобы по нему нашелся пользователь в вашей базе данных. 
@@ -85,3 +85,4 @@
 [redis-url]: https://redis.io/
 [docker-url]: https://www.docker.com/
 [product-screenshot]: images/demo.png
+[key-form-example-screenshot]: images/key-form.png
