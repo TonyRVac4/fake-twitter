@@ -14,7 +14,7 @@ async def test_get_posts_for_user(async_session: AsyncSession):
         async_session: AsyncSession
     """
     request = await TweetsMethods.get_posts_list(
-        async_session=async_session,
+        user_id=1, async_session=async_session,
     )
 
     assert request.status_code == 200

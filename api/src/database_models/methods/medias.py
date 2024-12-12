@@ -3,6 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from database_models.db_config import ResponseData  # noqa
 from database_models.tweets_orm_models import MediasTweets, Medias  # noqa
+from utils.logger_config import orm_logger  # noqa
 
 
 class MediasMethods(Medias):
@@ -35,6 +36,7 @@ class MediasMethods(Medias):
                 else:
                     result, code = {"result": False}, 404
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             result, code = {
                 "result": False,
                 "error_type": "SQLAlchemyError",
@@ -62,6 +64,7 @@ class MediasMethods(Medias):
                 await session.commit()
                 result, code = {"result": True, "media_id": new_media.id}, 201
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             result, code = {
                 "result": False,
                 "error_type": "SQLAlchemyError",
@@ -99,6 +102,7 @@ class MediasMethods(Medias):
                         "error_message": "Media does not exist.",
                     }, 404
         except SQLAlchemyError as err:
+            orm_logger.exception(str(err))
             result, code = {
                 "result": False,
                 "error_type": "SQLAlchemyError",
