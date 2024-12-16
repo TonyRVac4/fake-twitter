@@ -56,6 +56,10 @@
    git clone https://gitlab.skillbox.ru/alen_koibaev/python_basic_diploma.git
    ```
 3. Переименуйте файл `.env.template` на `.env` и установите ваши переменные окружения.
+4. Для корректной работы с API-ключами на вашей базе данных PostgreSQL должно быть установлено расширение pgcrypto.
+   ```postgresql
+   CREATE EXTENSION IF NOT EXISTS pgcrypto;
+   ```
 4. В файле `nginx.conf` измените `server_name` параметер на id вашего сервера или `localhost` если запускайте локально.
 5. Перейдите в директорию проекта:
    ```shell
