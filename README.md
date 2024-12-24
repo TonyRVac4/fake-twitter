@@ -29,7 +29,7 @@
 ### Особенности работы
 Поскольку данная версия прииложения не имеет систему аутентификации используется небольшая фронтенд форма, в которую мы можем подставить api ключ для пользователя на бэкенде.
 
-![Keys][work-with_keys-screenshot]
+![Keys][key-form-example-screenshot]
 
 Все endpoint имеют `http-header` с названием `api-key` и frontend автоматически будет подставлять его. 
 Ключ вы можете подставить совершенно любой, главное чтобы по нему нашелся пользователь в вашей базе данных. 
@@ -56,6 +56,10 @@
    git clone https://gitlab.skillbox.ru/alen_koibaev/python_basic_diploma.git
    ```
 3. Переименуйте файл `.env.template` на `.env` и установите ваши переменные окружения.
+4. Для корректной работы с API-ключами на вашей базе данных PostgreSQL должно быть установлено расширение pgcrypto.
+   ```postgresql
+   CREATE EXTENSION IF NOT EXISTS pgcrypto;
+   ```
 4. В файле `nginx.conf` измените `server_name` параметер на id вашего сервера или `localhost` если запускайте локально.
 5. Перейдите в директорию проекта:
    ```shell
@@ -85,3 +89,4 @@
 [redis-url]: https://redis.io/
 [docker-url]: https://www.docker.com/
 [product-screenshot]: images/demo.png
+[key-form-example-screenshot]: images/key-form.png
