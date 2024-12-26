@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.post("", response_model=MediaUploadResponseDataWithId)
+@router.post("", response_model=MediaUploadResponseDataWithId, status_code=201)
 async def upload_media_from_post(
     file: UploadFile,
     session: AsyncSession = Depends(get_async_session),
