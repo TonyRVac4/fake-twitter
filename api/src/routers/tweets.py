@@ -43,7 +43,7 @@ async def posts_list(
     )
 
 
-@router.post("", response_model=TweetResponseWithId)
+@router.post("", response_model=TweetResponseWithId, status_code=201)
 async def add_new_post(
     tweet_data: TweetDataIn,
     request: Request,
@@ -119,7 +119,7 @@ async def delete_post(
     )
 
 
-@router.post("/{post_id}/likes", response_model=BaseResponseDataOut)
+@router.post("/{post_id}/likes", response_model=BaseResponseDataOut, status_code=201)
 async def like_post(
     post_id: int,
     request: Request,
