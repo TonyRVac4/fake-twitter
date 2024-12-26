@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 
-@router.post("/{user_id}/follow", response_model=BaseResponseDataOut)
+@router.post("/{user_id}/follow", response_model=BaseResponseDataOut, status_code=201)
 async def follow_user(
     user_id: int,
     request: Request,
