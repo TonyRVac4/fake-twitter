@@ -53,7 +53,7 @@
 1. Для того чтобы запустить это приложение на вашей машине уже должен быть установлен docker.
 2. Клонируйте репозиторий на вашу локальную машину:
    ```shell
-   git clone https://gitlab.skillbox.ru/alen_koibaev/python_basic_diploma.git
+   git clone https://github.com/TonyRVac4/fake-twitter.git
    ```
 3. Переименуйте файл `.env.template` на `.env` и установите ваши переменные окружения.
 4. Для корректной работы с API-ключами на вашей базе данных PostgreSQL должно быть установлено расширение pgcrypto.
