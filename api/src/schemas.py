@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Optional, Annotated, Union
 
 from pydantic import BaseModel, ConfigDict
+from fastapi import Query
 
 
 class BaseResponseDataOut(BaseModel):
@@ -71,3 +72,15 @@ class UserProfileDataOut(BaseResponseDataOut):
     """Class extends basic response with user's profile data."""
 
     user: UserData
+
+
+class Pagination(BaseModel):
+    offset: Optional[int]
+    limit: Optional[int]
+
+
+def pagination_params(
+    offset: Annotated[Union[int, None], Query(ge=1, le=150)] = None,
+    limit: Annotated[Union[int, None], Query(ge=1, le=100)] = None,
+):
+    return Pagination(offset=offset, limit=limit)
