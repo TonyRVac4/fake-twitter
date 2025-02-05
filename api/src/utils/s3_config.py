@@ -86,7 +86,7 @@ class S3Client:
                 "link": link,
             }, 201
         except ClientError as err:
-            s3_logger.exception(str(str))
+            s3_logger.exception(str(err))
             result, code = {
                 "result": False,
                 "error_type": "ClientError",

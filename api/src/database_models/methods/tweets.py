@@ -1,4 +1,6 @@
-from sqlalchemy import and_, delete, select
+import math
+
+from sqlalchemy import and_, delete, select, func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -6,6 +8,7 @@ from database_models.db_config import ResponseData  # noqa
 from database_models.tweets_orm_models import Likes, MediasTweets, Medias, Tweets  # noqa
 from database_models.users_orm_models import Cookies, Followers, Users  # noqa
 from utils.logger_config import orm_logger  # noqa
+from schemas import Pagination  # noqa
 
 
 class TweetsMethods(Tweets):
@@ -49,12 +52,16 @@ class TweetsMethods(Tweets):
 
     @classmethod
     async def get_posts_list(
-        cls, user_id: int, async_session: AsyncSession,
+        cls,
+        user_id: int,
+        pagination: Pagination,
+        async_session: AsyncSession,
     ) -> ResponseData:
         """Return posts from followed pages for user by id.
 
         Parameters:
             user_id: int
+            pagination: Pagination(offset: int, limit: int)
             async_session: AsyncSession
 
         Returns:
@@ -62,74 +69,73 @@ class TweetsMethods(Tweets):
         """
         try:
             async with async_session as session:
-                get_follows_expr = (
-                    select(Followers).
-                    where(Followers.follower_id == user_id).
-                    options(
-                        selectinload(Followers.user).
-                        selectinload(Users.tweets).
-                        selectinload(Tweets.likes).
-                        selectinload(Likes.user),
+                get_followed_expr = (
+                    select(Followers.user_id)
+                    .where(Followers.follower_id == user_id)
+                )
+                get_followed_request = await session.execute(get_followed_expr)
+                followed_ids: list = get_followed_request.scalars().fetchall()
+                followed_ids.append(user_id)
+
+                if pagination.offset is None:
+                    offset = None
+                elif pagination.offset == 1:
+                    offset = pagination.offset - 1
+                else:
+                    offset = (pagination.offset - 1) * pagination.limit
+
+                get_tweets_expr = (
+                    select(Tweets)
+                    .join(Users, Tweets.user_id == Users.id)
+                    .outerjoin(Likes, Likes.tweet_id == Tweets.id)
+                    .where(Tweets.user_id.in_(followed_ids))
+                    .group_by(Tweets.id)
+                    .order_by(func.count(Likes.tweet_id).desc())
+                    .limit(pagination.limit)
+                    .offset(offset)
+                    .options(
+                        selectinload(Tweets.user),
+                        selectinload(Tweets.likes).selectinload(Likes.user),
+                        selectinload(Tweets.medias)
                     )
                 )
-                get_users_posts = select(Tweets).where(Tweets.user_id == user_id)
-                get_follows_request = await session.execute(get_follows_expr)
-                get_users_posts_request = await session.execute(get_users_posts)
-                follows: list = get_follows_request.scalars().fetchall()
-                users_posts: list = get_users_posts_request.scalars().fetchall()
+                get_tweets_request = await session.execute(get_tweets_expr)
+                get_tweets_result = get_tweets_request.scalars().fetchall()
 
                 tweets: list = []
 
-                if follows:
-                    for follow in follows:
-                        for tweet in follow.user.tweets:
-                            tweets.append(
-                                {
-                                    "id": tweet.id,
-                                    "content": tweet.data,
-                                    "attachments": [
-                                        media.link for media in tweet.medias
-                                    ],
-                                    "author": {
-                                        "id": tweet.user.id,
-                                        "name": tweet.user.username,
-                                    },
-                                    "likes": [
-                                        {
-                                            "user_id": like.user_id,
-                                            "name": like.user.username,
-                                        }
-                                        for like in tweet.likes
-                                    ],
-                                },
-                            )
-                if users_posts:
-                    for user_tweet in users_posts:
-                        tweets.append(
-                            {
-                                "id": user_tweet.id,
-                                "content": user_tweet.data,
-                                "attachments": [
-                                    media.link for media in user_tweet.medias
-                                ],
-                                "author": {
-                                    "id": user_tweet.user.id,
-                                    "name": user_tweet.user.username,
-                                },
-                                "likes": [
-                                    {
-                                        "user_id": like.user_id,
-                                        "name": like.user.username,
-                                    }
-                                    for like in user_tweet.likes
-                                ],
+                for tweet in get_tweets_result:
+                    tweets.append(
+                        {
+                            "id": tweet.id,
+                            "content": tweet.data,
+                            "attachments": [
+                                media.link for media in tweet.medias
+                            ],
+                            "author": {
+                                "id": tweet.user.id,
+                                "name": tweet.user.username,
                             },
-                        )
+                            "likes": [
+                                {
+                                    "user_id": like.user_id,
+                                    "name": like.user.username,
+                                }
+                                for like in tweet.likes
+                            ],
+                        },
+                    )
 
-                sorted_tweets = sorted(
-                    tweets, key=lambda i_tweet: len(i_tweet["likes"]), reverse=True,
-                )
-                result, code = {"result": True, "tweets": sorted_tweets}, 200
+                if pagination.offset and pagination.limit:
+                    result, code = {
+                        "result": True,
+                        "tweets": tweets,
+                        "page": pagination.offset,
+                        "size": pagination.limit,
+                        "total": math.ceil(len(tweets) / pagination.limit) - 1
+                    }, 200
+                else:
+                    result, code = {"result": True, "tweets": tweets}, 200
         except SQLAlchemyError as err:
             orm_logger.exception(str(err))
             result, code = {
