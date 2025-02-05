@@ -10,7 +10,7 @@ asyncpg
 alembic
 black
 python-multipart
-aiobotocore
+aiobotocore==2.16.1
 types-aiobotocore-s3
 certifi
 wemake-python-styleguide
