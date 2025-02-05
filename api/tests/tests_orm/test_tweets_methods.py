@@ -2,6 +2,7 @@ from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database_models.methods.tweets import LikesMethods, TweetsMethods  # noqa
+from src.schemas import Pagination  # noqa
 from database_models.tweets_orm_models import Likes, MediasTweets, Medias, Tweets  # noqa
 
 
@@ -14,7 +15,9 @@ async def test_get_posts_for_user(async_session: AsyncSession):
         async_session: AsyncSession
     """
     request = await TweetsMethods.get_posts_list(
-        user_id=1, async_session=async_session,
+        user_id=1,
+        pagination=Pagination(offset=None, limit=None),
+        async_session=async_session,
     )
 
     assert request.status_code == 200
