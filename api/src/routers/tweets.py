@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -5,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from types_aiobotocore_s3 import Client
 from schemas import BaseResponseDataOut, TweetDataIn  # noqa
 from schemas import TweetResponseWithId, TweetsListDataOut  # noqa
+from schemas import Pagination, pagination_params  # noqa
 from database_models.db_config import ResponseData, get_async_session  # noqa
 from database_models.methods.tweets import LikesMethods, TweetsMethods  # noqa
 from database_models.methods.users import CookiesMethods  # noqa
@@ -18,6 +21,7 @@ router = APIRouter(
 
 @router.get("", response_model=TweetsListDataOut)
 async def posts_list(
+    pagination: Annotated[Pagination, Depends(pagination_params)],
     request: Request,
     session: AsyncSession = Depends(get_async_session),
 ):
@@ -27,6 +31,7 @@ async def posts_list(
         api-key: str
 
     Parameters:
+        pagination: Pagination(offset: int, limit: int)
         request: FastAPI Request object
         session: dependency - Async session
 
@@ -35,7 +40,9 @@ async def posts_list(
     """
     user_id: int = request.state.user_id
     tweets_data: ResponseData = await TweetsMethods.get_posts_list(
-        user_id=user_id, async_session=session,
+        user_id=user_id,
+        pagination=pagination,
+        async_session=session,
     )
     return JSONResponse(
         content=jsonable_encoder(tweets_data.response),
